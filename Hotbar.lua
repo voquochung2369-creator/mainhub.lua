@@ -1,93 +1,69 @@
-local Hub =
-    _G.CustomHub
+--------------------------------------------------
+-- CUSTOM HUB - HOTBAR.LUA
+--------------------------------------------------
 
-if not Hub then
+local Hub = _G.CustomHub
 
-    warn(
-        "CustomHub Main.lua chưa được load"
-    )
-
+if not Hub or not Hub.Window then
+    warn("CustomHub Main.lua chưa được load")
     return
 end
 
-local Window =
-    Hub.Window
+local Window = Hub.Window
 
 --------------------------------------------------
--- LINK
+-- TAB + LINK
 --------------------------------------------------
 
-local BLOXFRUIT_URL =
-    "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/BloxFruit.lua"
+local Tabs = {
+    {
+        Name = "Blox Fruit",
+        Slot = 1,
+        Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/BloxFruit.lua"
+    },
 
-local ESP_URL =
-    "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/ESP.lua"
+    {
+        Name = "ESP",
+        Slot = 2,
+        Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/ESP.lua"
+    },
 
-local SETTING_URL =
-    "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Setting.lua"
-
---------------------------------------------------
--- BLOX FRUIT TAB
---------------------------------------------------
-
-Window:MakeTab({
-
-    Name =
-        "Blox Fruit",
-
-    Icon =
-        "",
-
-    PremiumOnly =
-        false,
-
-    Slot =
-        1,
-
-    Link =
-        BLOXFRUIT_URL
-})
+    {
+        Name = "Setting",
+        Slot = 3,
+        Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Setting.lua"
+    }
+}
 
 --------------------------------------------------
--- ESP TAB
+-- CREATE + LOAD
 --------------------------------------------------
 
-Window:MakeTab({
+for _, Data in ipairs(Tabs) do
 
-    Name =
-        "ESP",
+    local Tab = Window:MakeTab({
+        Name = Data.Name,
+        Icon = "",
+        PremiumOnly = false,
+        Slot = Data.Slot
+    })
 
-    Icon =
-        "",
+    local Success, Error = pcall(function()
 
-    PremiumOnly =
-        false,
+        local Script = loadstring(
+            game:HttpGet(Data.Link)
+        )
 
-    Slot =
-        2,
+        if Script then
+            Script(Tab)
+        end
 
-    Link =
-        ESP_URL
-})
+    end)
 
---------------------------------------------------
--- SETTING TAB
---------------------------------------------------
-
-Window:MakeTab({
-
-    Name =
-        "Setting",
-
-    Icon =
-        "",
-
-    PremiumOnly =
-        false,
-
-    Slot =
-        3,
-
-    Link =
-        SETTING_URL
-})
+    if not Success then
+        warn(
+            "[" .. Data.Name .. "] Load Error:",
+            Error
+        )
+    end
+end
