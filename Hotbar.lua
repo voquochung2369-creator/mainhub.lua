@@ -18,13 +18,13 @@ local Window =
 --------------------------------------------------
 
 local BLOXFRUIT_URL =
-    "YOUR_RAW_BLOXFRUIT_URL"
+    "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/BloxFruit.lua"
 
 local ESP_URL =
-    "YOUR_RAW_ESP_URL"
+    "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/ESP.lua"
 
 local SETTING_URL =
-    "YOUR_RAW_SETTING_URL"
+    "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Setting.lua"
 
 --------------------------------------------------
 -- BLOX FRUIT TAB
