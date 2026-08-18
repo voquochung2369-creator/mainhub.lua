@@ -7,7 +7,7 @@ local HttpService = game:GetService("HttpService")
 --------------------------------------------------
 
 local HOTBAR_URL =
-    "YOUR_RAW_HOTBAR_URL"
+    "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Hotbar.lua"
 
 --------------------------------------------------
 -- SAVE SYSTEM
