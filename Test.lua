@@ -6,9 +6,7 @@ if not Hub then
 end
 
 local Window = Hub.Window
-
 local Test = nil
-
 for _, tab in ipairs(Window.Tabs) do
 
     if tab.Name == "Test" then
@@ -18,7 +16,6 @@ for _, tab in ipairs(Window.Tabs) do
         break
     end
 end
-
 
 if not Test then
 
