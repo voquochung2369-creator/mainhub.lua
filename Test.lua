@@ -27,7 +27,7 @@ if not Test then
 end
 
 
-Test({
+Test:AddButton({
 
     Name =
         "Team",
