@@ -47,19 +47,11 @@ end
 --------------------------------------------------
 
 Bloxfruit:AddButton({
-
-    Name =
-        "Real Kid",
-
-    Click =
-        "Button",
-
-    Slot =
-        1,
-
+    Name = "Real Kid",
+    Click = "Button",
+    Slot = 1,
     Callback =
         function()
-
             local success, result =
                 pcall(
                     function()
