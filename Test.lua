@@ -30,58 +30,96 @@ end
 
 Test:AddButton({
 
-    Name = "Auto Join Team",
-    Click = "Scroll",
-    Slot = 1,
-    Min = 0,
-    Max = 1,
-    Save = true,
+    Name =
+        "Auto Join Team",
+
+    Click =
+        "Scroll",
+
+    Slot =
+        1,
+
+    Min =
+        0,
+
+    Max =
+        1,
+
+    Save =
+        true,
+
+
     Options = {
+
         {
-            Name = "Marines",
+
+            Name =
+                "Marines",
+
             Callback =
                 function(
                     Name,
                     Selected
                 )
+
                     getgenv().Team =
                         "Marines"
+
                 end
         },
+
+
         {
+
             Name =
                 "Pirates",
+
             Callback =
                 function(
                     Name,
                     Selected
                 )
+
                     getgenv().Team =
                         "Pirates"
+
                 end
         }
     },
 
+
     ChildClick =
         "Lever",
+
+
     ChildName =
         "Auto Join Team",
+
+
     ChildSave =
         true,
+
+
     ChildDefault =
         false,
-ChildCallback =
-    function(
-        Enabled,
-        Selected
-    )
+
+
+    ChildCallback =
+        function(
+            Enabled,
+            Selected
+        )
+
 
         if Enabled then
 
+
             if Selected[1] == "Marines" then
+
 
                 getgenv().Team =
                     "Marines"
+
 
                 game:GetService("ReplicatedStorage")
                     .Remotes
@@ -93,8 +131,10 @@ ChildCallback =
 
             elseif Selected[1] == "Pirates" then
 
+
                 getgenv().Team =
                     "Pirates"
+
 
                 game:GetService("ReplicatedStorage")
                     .Remotes
