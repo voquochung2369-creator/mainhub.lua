@@ -66,26 +66,16 @@ ESP:AddButton({
 Callback = function(Value)
 
     local source =
-        game:HttpGet(
-            "LINK_ESP_PLAYER.lua"
-        )
+        game:HttpGet("https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/HotBar_ESP_Player.lua")
 
     local fn =
         loadstring(source)
-
     fn()
 
-
     if _G.CustomHubESP then
-
-        _G.CustomHubESP.Toggle(
-            Value
-        )
-
+        _G.CustomHubESP.Toggle(Value)
     end
-
 end
-})
 
 --------------------------------------------------
 -- ESP SELECTOR
