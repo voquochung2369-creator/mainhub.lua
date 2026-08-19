@@ -21,8 +21,14 @@ local Tabs = {
     },
 
     {
-        Name = "Setting",
+        Name = "Test",
         Slot = 3,
+        Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Test.lua"
+    },
+
+    {
+        Name = "Setting",
+        Slot = 4,
         Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Setting.lua"
     }
 }
