@@ -33,7 +33,7 @@ for _, tab in ipairs(
     end
 end
 
-if not Setting then
+if not Test then
 
     warn(
         "Không tìm thấy tab Test"
@@ -42,7 +42,7 @@ if not Setting then
     return
 end
 
-Setting:AddButton({
+Test:AddButton({
     Name = "Auto Join Marines",
     Click = "Lever",
     Slot = 1,
