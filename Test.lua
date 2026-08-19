@@ -7,7 +7,6 @@ end
 
 local Window = Hub.Window
 
-
 local Test = nil
 
 for _, tab in ipairs(Window.Tabs) do
