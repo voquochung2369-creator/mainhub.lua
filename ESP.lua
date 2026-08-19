@@ -30,12 +30,19 @@ end
 --------------------------------------------------
 
 ESP:AddButton({
-    Name = "ESP LIST",
+
+    Name = "ESP Selector",
+
     Click = "Scroll",
+
     Slot = 1,
+
     Min = 0,
-    Max = 4,
+
+    Max = 1,
+
     Save = true,
+
     Classic = {
         "Player"
     },
@@ -58,6 +65,8 @@ ESP:AddButton({
                     if fn then
                         fn()
                     end
+                end
+
             end
         },
 
@@ -65,6 +74,7 @@ ESP:AddButton({
             Name = "NPC",
 
             Callback = function()
+                print("NPC ESP Selected")
             end
         },
 
@@ -72,6 +82,7 @@ ESP:AddButton({
             Name = "Chest",
 
             Callback = function()
+                print("Chest ESP Selected")
             end
         },
 
@@ -79,48 +90,58 @@ ESP:AddButton({
             Name = "Fruit",
 
             Callback = function()
+                print("Fruit ESP Selected")
             end
         }
+
     },
 
     ChildClick = "Lever",
 
-    ChildName = "ESP",
+    ChildName = "Auto Execute",
 
     ChildDefault = false,
 
-    ChildSave = false,
+    ChildSave = true,
 
     ChildCallback = function(Value, Selected)
 
         if Value then
 
-            for _, name in ipairs(Selected) do
+            if Selected[1] == "Player" then
 
-                if name == "Player" then
+                if not _G.CustomHubESP then
 
-                    if not _G.CustomHubESP then
+                    local source = game:HttpGet(
+                        "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/HotBar_ESP_Player.lua"
+                    )
 
-                        local source = game:HttpGet(
-                            "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/HotBar_ESP_Player.lua"
-                        )
+                    local fn = loadstring(source)
 
-                        local fn = loadstring(source)
-
-                        if fn then
-                            fn()
-                        end
+                    if fn then
+                        fn()
                     end
 
-                    if _G.CustomHubESP then
-                        _G.CustomHubESP.Toggle(true)
-                    end
                 end
+
+                if _G.CustomHubESP then
+                    _G.CustomHubESP.Toggle(true)
+                end
+
+            end
+
+            print("Auto Execute ON")
+
         else
 
             if _G.CustomHubESP then
                 _G.CustomHubESP.Toggle(false)
             end
+
+            print("Auto Execute OFF")
+
         end
+
     end
+
 })
