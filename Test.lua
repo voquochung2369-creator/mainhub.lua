@@ -54,7 +54,7 @@ Test:AddButton({
         )
 
         if Enabled then
-              task.wait(3) 
+              task.wait(2) 
             if Selected[1] == "Marines" then
                 getgenv().Team = "Marines"
                 game:GetService("ReplicatedStorage")
@@ -66,7 +66,7 @@ Test:AddButton({
 
 
             elseif Selected[1] == "Pirates" then
-                task.wait(3)
+                task.wait(2)
                 getgenv().Team = "Pirates"
                 game:GetService("ReplicatedStorage")
                     .Remotes
