@@ -13,65 +13,67 @@ end
 local Window =
     Hub.Window
 
---------------------------------------------------
--- FIND TAB
---------------------------------------------------
-
-local Test = nil
-
-for _, tab in ipairs(
-    Window.Tabs
-) do
-
-    if tab.Name ==
-        "Test" then
-
-        Setting =
-            tab
-
-        break
-    end
-end
-
-if not Test then
-
-    warn(
-        "Không tìm thấy tab Test"
-    )
-
-    return
-end
+local Test = Window({
+    Name = "Test",
+    Slot = 1
+})
 
 Test:AddButton({
-    Name = "Auto Join Marines",
-    Click = "Lever",
-    Slot = 1,
-    Default = false,
+
+    Name = "Team",
+    Click = "Scroll",
+
     Save = true,
-    Callback =
-        function(
-            Value
-        )
-                                getgenv().Team = "Marines"
-                            if type(fn)
-                                ~= "function" then
+    Default = false,
 
-                                error(
-                                    "Auto Join Marines fail"
-                                )
-                            end
+    Min = 1,
+    Max = 1,
 
-                            return fn()
-                        end
-                    )
+    Options = {
+        {
+            Name = "Marines",
 
-                if not success then
+            Callback = function()
 
-                    warn(
-                        "Auto Join Marines error:",
-                        result
-                    )
-                end
+                getgenv().Team = "Marines"
+
             end
+        },
+
+        {
+            Name = "Pirates",
+
+            Callback = function()
+
+                getgenv().Team = "Pirates"
+
+            end
+        }
+    },
+
+    ChildClick = "Lever",
+
+    ChildName = "Auto Select Team",
+
+    ChildSave = true,
+
+    ChildDefault = false,
+
+    ChildCallback = function(enabled, selected)
+
+        if enabled then
+
+            if selected[1] == "Marines" then
+
+                getgenv().Team = "Marines"
+
+            elseif selected[1] == "Pirates" then
+
+                getgenv().Team = "Pirates"
+
+            end
+
         end
+
+    end
 })
