@@ -31,15 +31,15 @@ end
 
 ESP:AddButton({
 
-    Name = "ESP Selector",
+    Name = "ESP LIST",
 
     Click = "Scroll",
 
     Slot = 1,
 
-    Min = 1,
+    Min = 0,
 
-    Max = 1,
+    Max = 4,
 
     Save = true,
 
