@@ -2,6 +2,34 @@ repeat
     task.wait()
 until game:IsLoaded()
 
+
+task.wait(5)
+
+
+
+--------------------------------------------------
+-- ANTI LOAD DUPLICATE
+--------------------------------------------------
+
+if _G.CustomHubESPLoaded then
+
+    warn(
+        "ESP Player already loaded"
+    )
+
+    return
+
+end
+
+
+_G.CustomHubESPLoaded = true
+
+
+
+--------------------------------------------------
+-- SERVICES
+--------------------------------------------------
+
 local Players =
     game:GetService("Players")
 
@@ -17,29 +45,15 @@ local LocalPlayer =
 
 
 --------------------------------------------------
--- REMOVE OLD ESP
+-- VARIABLES
 --------------------------------------------------
-
-if _G.CustomHubESP then
-
-    pcall(function()
-
-        _G.CustomHubESP.Close()
-
-    end)
-
-end
-
-
 
 local ESPEnabled =
     false
 
 
-
 local ESPObjects =
     {}
-
 
 
 local Connections =
@@ -47,8 +61,9 @@ local Connections =
 
 
 
+
 --------------------------------------------------
--- CLEAR
+-- CLEAR ESP
 --------------------------------------------------
 
 local function ClearESP()
@@ -57,6 +72,7 @@ local function ClearESP()
     for _, obj in pairs(
         ESPObjects
     ) do
+
 
         pcall(function()
 
@@ -76,6 +92,7 @@ local function ClearESP()
     for _, con in pairs(
         Connections
     ) do
+
 
         pcall(function()
 
@@ -133,9 +150,12 @@ local function CreateESP(
         )
 
 
+
     if not root
     or not humanoid then
+
         return
+
     end
 
 
@@ -146,7 +166,7 @@ local function CreateESP(
 
 
     --------------------------------------------------
-    -- OUTLINE ONLY
+    -- BODY OUTLINE
     --------------------------------------------------
 
     local highlight =
@@ -219,18 +239,20 @@ local function CreateESP(
 
 
     --------------------------------------------------
-    -- DON'T SHOW SELF TEXT
+    -- SELF NO TEXT
     --------------------------------------------------
 
     if IsSelf then
+
         return
+
     end
 
 
 
 
     --------------------------------------------------
-    -- INFO TEXT
+    -- INFO GUI
     --------------------------------------------------
 
     local gui =
@@ -267,6 +289,7 @@ local function CreateESP(
         )
 
 
+
     gui.AlwaysOnTop =
         true
 
@@ -288,6 +311,7 @@ local function CreateESP(
         Instance.new(
             "TextLabel"
         )
+
 
 
     label.Size =
@@ -313,12 +337,15 @@ local function CreateESP(
         )
 
 
+
     label.TextStrokeTransparency =
         0
 
 
+
     label.TextSize =
         16
+
 
 
     label.Font =
@@ -332,10 +359,11 @@ local function CreateESP(
 
 
 
-    local con
+
+    local connection
 
 
-    con =
+    connection =
         RunService.RenderStepped:Connect(
             function()
 
@@ -343,7 +371,7 @@ local function CreateESP(
                 if not ESPEnabled then
 
 
-                    con:Disconnect()
+                    connection:Disconnect()
 
 
                     return
@@ -355,7 +383,7 @@ local function CreateESP(
                 if not character.Parent then
 
 
-                    con:Disconnect()
+                    connection:Disconnect()
 
 
                     return
@@ -414,7 +442,6 @@ local function CreateESP(
                         ..
                         " Health"
 
-
                 end
 
 
@@ -422,9 +449,10 @@ local function CreateESP(
         )
 
 
+
     table.insert(
         Connections,
-        con
+        connection
     )
 
 
@@ -433,14 +461,16 @@ end
 
 
 
+
 --------------------------------------------------
--- UPDATE
+-- UPDATE ESP
 --------------------------------------------------
 
 local function UpdateESP()
 
 
     ClearESP()
+
 
 
     if not ESPEnabled then
@@ -458,15 +488,18 @@ local function UpdateESP()
             player
         )
 
+
     end
+
 
 end
 
 
 
 
+
 --------------------------------------------------
--- CHARACTER LOAD
+-- PLAYER JOIN
 --------------------------------------------------
 
 Players.PlayerAdded:Connect(
@@ -487,11 +520,13 @@ Players.PlayerAdded:Connect(
                         player
                     )
 
+
                 end
 
 
             end
         )
+
 
     end
 )
@@ -499,8 +534,9 @@ Players.PlayerAdded:Connect(
 
 
 
+
 --------------------------------------------------
--- HUB CONTROL
+-- HUB API
 --------------------------------------------------
 
 _G.CustomHubESP = {
@@ -508,16 +544,16 @@ _G.CustomHubESP = {
 
     Toggle =
         function(
-            state
+            Value
         )
 
 
             ESPEnabled =
-                state
+                Value
 
 
 
-            if state then
+            if Value then
 
 
                 UpdateESP()
@@ -544,7 +580,13 @@ _G.CustomHubESP = {
                 false
 
 
+
             ClearESP()
+
+
+
+            _G.CustomHubESPLoaded =
+                false
 
 
         end
@@ -553,6 +595,8 @@ _G.CustomHubESP = {
 
 
 
+
+
 warn(
-    "ESP Player Loaded"
+    "CustomHub ESP Player Loaded"
 )
