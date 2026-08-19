@@ -1,17 +1,11 @@
-local Hub =
-    _G.CustomHub
+local Hub = _G.CustomHub
 
 if not Hub then
-
-    warn(
-        "CustomHub Main.lua chưa được load"
-    )
-
+    warn("CustomHub Main.lua chưa được load")
     return
 end
 
-local Window =
-    Hub.Window
+local Window = Hub.Window
 
 --------------------------------------------------
 -- FIND TAB
@@ -19,72 +13,17 @@ local Window =
 
 local ESP = nil
 
-for _, tab in ipairs(
-    Window.Tabs
-) do
-
-    if tab.Name ==
-        "ESP" then
-
-        ESP =
-            tab
-
+for _, tab in ipairs(Window.Tabs) do
+    if tab.Name == "ESP" then
+        ESP = tab
         break
     end
 end
 
 if not ESP then
-
-    warn(
-        "Không tìm thấy tab ESP"
-    )
-
+    warn("Không tìm thấy tab ESP")
     return
 end
-
---------------------------------------------------
--- PLAYER ESP
---------------------------------------------------
-
-ESP:AddButton({
-
-    Name =
-        "Player ESP",
-
-    Click =
-        "Lever",
-
-    Slot =
-        1,
-
-    Default =
-        false,
-
-    Save =
-        true,
-
-Callback = function(Value)
-
-    if not _G.CustomHubESP then
-
-        local source =
-            game:HttpGet(
-            "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/HotBar_ESP_Player.lua"
-            )
-
-        loadstring(source)()
-
-    end
-
-
-    if _G.CustomHubESP then
-
-        _G.CustomHubESP.Toggle(Value)
-
-    end
-
-end
-})
 
 --------------------------------------------------
 -- ESP SELECTOR
@@ -92,123 +31,117 @@ end
 
 ESP:AddButton({
 
-    Name =
-        "ESP Selector",
+    Name = "ESP Selector",
 
-    Click =
-        "Scroll",
+    Click = "Scroll",
 
-    Slot =
-        2,
+    Slot = 1,
 
-    Min =
-        1,
+    Min = 1,
 
-    Max =
-        2,
+    Max = 1,
 
-    Save =
-        true,
+    Save = true,
 
     Classic = {
-
         "Player"
     },
 
     Options = {
 
         {
-            Name =
-                "Player",
+            Name = "Player",
 
-            Callback =
-                function()
+            Callback = function(Name, Selected)
 
-                    print(
-                        "Player option"
+                if not _G.CustomHubESP then
+
+                    local source = game:HttpGet(
+                        "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/HotBar_ESP_Player.lua"
                     )
+
+                    local fn = loadstring(source)
+
+                    if fn then
+                        fn()
+                    end
                 end
+
+                print("Player ESP Loaded")
+
+            end
         },
 
         {
-            Name =
-                "NPC",
+            Name = "NPC",
 
-            Callback =
-                function()
-
-                    print(
-                        "NPC option"
-                    )
-                end
+            Callback = function()
+                print("NPC ESP Selected")
+            end
         },
 
         {
-            Name =
-                "Chest",
+            Name = "Chest",
 
-            Callback =
-                function()
-
-                    print(
-                        "Chest option"
-                    )
-                end
+            Callback = function()
+                print("Chest ESP Selected")
+            end
         },
 
         {
-            Name =
-                "Fruit",
+            Name = "Fruit",
 
-            Callback =
-                function()
-
-                    print(
-                        "Fruit option"
-                    )
-                end
+            Callback = function()
+                print("Fruit ESP Selected")
+            end
         }
     },
 
-    ChildClick =
-        "Lever",
+    ChildClick = "Lever",
 
-    ChildName =
-        "Auto Execute",
+    ChildName = "ESP",
 
-    ChildDefault =
-        false,
+    ChildDefault = false,
 
-    ChildSave =
-        true,
+    ChildSave = false,
 
-    ChildCallback =
-        function(
-            Value,
-            Selected
-        )
+    ChildCallback = function(Value, Selected)
 
-            if Value then
+        if Value then
 
-                print(
-                    "Auto Execute ON"
-                )
+            for _, name in ipairs(Selected) do
 
-                for _, name in ipairs(
-                    Selected
-                ) do
+                if name == "Player" then
 
-                    print(
-                        "Auto:",
-                        name
-                    )
+                    if not _G.CustomHubESP then
+
+                        local source = game:HttpGet(
+                            "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/HotBar_ESP_Player.lua"
+                        )
+
+                        local fn = loadstring(source)
+
+                        if fn then
+                            fn()
+                        end
+                    end
+
+                    if _G.CustomHubESP then
+                        _G.CustomHubESP.Toggle(true)
+                    end
                 end
-
-            else
-
-                print(
-                    "Auto Execute OFF"
-                )
             end
+
+            print("Auto Execute ON")
+
+        else
+
+            if _G.CustomHubESP then
+                _G.CustomHubESP.Toggle(false)
+            end
+
+            print("Auto Execute OFF")
+
         end
+    end
 })
