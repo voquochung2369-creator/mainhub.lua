@@ -2346,21 +2346,30 @@ local function SelectTab(tab)
 
             local function GetExpandedHeight()
 
-                local height =
-                    45 + 150 + 10
+    local scrollY =
+        scrollFrame.Position.Y.Offset
 
-                if data.ChildClick
-                    == "Button"
+    local scrollHeight =
+        scrollFrame.Size.Y.Offset
 
-                    or data.ChildClick
-                    == "Lever" then
+    local childGap = 10
+    local childHeight = 45
 
-                    height =
-                        height + 45
-                end
+    local height =
+        scrollY
+        + scrollHeight
 
-                return height
-            end
+    if data.ChildClick == "Button"
+        or data.ChildClick == "Lever" then
+
+        height =
+            height
+            + childGap
+            + childHeight
+    end
+
+    return height
+end
 
             if expanded then
 
@@ -3020,462 +3029,157 @@ local function SelectTab(tab)
             UpdateInnerScroll()
 
             --------------------------------------------------
-            -- CHILD CONTROL
-            --------------------------------------------------
+-- CHILD CONTROL
+--------------------------------------------------
 
-            local childControl =
-                nil
+local childControl = nil
 
-            if data.ChildClick
-                == "Button" then
+local childGap = 10
+local childHeight = 45
 
-                childControl =
-                    Instance.new(
-                        "TextButton"
-                    )
+local childY =
+    scrollFrame.Position.Y.Offset
+    + scrollFrame.Size.Y.Offset
+    + childGap
 
-                childControl.Parent =
-                    root
+if data.ChildClick == "Button" then
 
-                childControl.Size =
-                    UDim2.new(
-                        1,
-                        0,
-                        0,
-                        40
-                    )
+    childControl =
+        Instance.new("TextButton")
 
-                childControl.Position =
-                    UDim2.new(
-                        0,
-                        0,
-                        0,
-                        210
-                    )
+    childControl.Parent =
+        root
 
-                childControl.BackgroundColor3 =
-                    Color3.fromRGB(
-                        100,
-                        100,
-                        100
-                    )
+    childControl.Size =
+        UDim2.new(
+            1,
+            0,
+            0,
+            childHeight
+        )
 
-                childControl.BorderSizePixel =
-                    0
+    childControl.Position =
+        UDim2.new(
+            0,
+            0,
+            0,
+            childY
+        )
 
-                childControl.Text =
-                    data.ChildName
-                    or "Execute Selected"
+    childControl.BackgroundColor3 =
+        Color3.fromRGB(
+            100,
+            100,
+            100
+        )
 
-                childControl.TextColor3 =
-                    Color3.fromRGB(
-                        255,
-                        255,
-                        255
-                    )
+    childControl.BackgroundTransparency =
+        0.05
 
-                childControl.TextStrokeTransparency =
-                    1
+    childControl.BorderSizePixel =
+        0
 
-                childControl.TextSize =
-                    14
+    childControl.Text =
+        data.ChildName
+        or "Execute Selected"
 
-                childControl.Font =
-                    Enum.Font.GothamBold
+    childControl.TextColor3 =
+        Color3.fromRGB(
+            255,
+            255,
+            255
+        )
 
-                childControl.Visible =
-                    expanded
+    childControl.TextStrokeTransparency =
+        1
 
-                local childCorner =
-                    Instance.new(
-                        "UICorner"
-                    )
+    childControl.TextSize =
+        14
 
-                childCorner.CornerRadius =
-                    UDim.new(
-                        0,
-                        8
-                    )
+    childControl.Font =
+        Enum.Font.GothamBold
 
-                childCorner.Parent =
-                    childControl
+    childControl.TextXAlignment =
+        Enum.TextXAlignment.Center
 
-                local childStroke =
-                    Instance.new(
-                        "UIStroke"
-                    )
+    childControl.Visible =
+        expanded
 
-                childStroke.Color =
-                    Color3.fromRGB(
-                        120,
-                        120,
-                        120
-                    )
+    local childCorner =
+        Instance.new("UICorner")
 
-                childStroke.Thickness =
-                    1
+    childCorner.CornerRadius =
+        UDim.new(
+            0,
+            8
+        )
 
-                childStroke.Parent =
-                    childControl
+    childCorner.Parent =
+        childControl
 
-                childControl.MouseButton1Click:Connect(
+    local childStroke =
+        Instance.new("UIStroke")
+
+    childStroke.Color =
+        Color3.fromRGB(
+            120,
+            120,
+            120
+        )
+
+    childStroke.Thickness =
+        1
+
+    childStroke.Transparency =
+        0.25
+
+    childStroke.Parent =
+        childControl
+
+    childControl.MouseButton1Click:Connect(
+        function()
+
+            if data.Min
+                and #data.Selected < data.Min then
+
+                return
+            end
+
+            if typeof(
+                data.Callback
+            ) == "function" then
+
+                task.spawn(
                     function()
 
-                        if data.Min
-                            and #data.Selected
-                                < data.Min then
+                        pcall(
+                            function()
 
-                            return
-                        end
-
-                        if typeof(
-                            data.Callback
-                        ) == "function" then
-
-                            task.spawn(
-                                function()
-
-                                    pcall(
-                                        function()
-
-                                            data.Callback(
-                                                data.Selected
-                                            )
-
-                                        end
-                                    )
-                                end
-                            )
-                        end
-
-                        for _, selectedName
-                            in ipairs(
-                                data.Selected
-                            ) do
-
-                            local option =
-                                FindOption(
-                                    data.Options,
-                                    selectedName
+                                data.Callback(
+                                    data.Selected
                                 )
 
-                            if option
-                                and typeof(
-                                    option.Callback
-                                ) == "function" then
-
-                                task.spawn(
-                                    function()
-
-                                        pcall(
-                                            function()
-
-                                                option.Callback(
-                                                    selectedName,
-                                                    data.Selected
-                                                )
-
-                                            end
-                                        )
-                                    end
-                                )
                             end
-                        end
+                        )
+
                     end
                 )
+            end
 
-            elseif data.ChildClick
-                == "Lever" then
+            for _, selectedName
+                in ipairs(
+                    data.Selected
+                ) do
 
-                childControl =
-                    Instance.new(
-                        "TextButton"
+                local option =
+                    FindOption(
+                        data.Options,
+                        selectedName
                     )
 
-                childControl.Parent =
-                    root
-
-                childControl.Size =
-                    UDim2.new(
-                        1,
-                        0,
-                        0,
-                        40
-                    )
-
-                childControl.Position =
-                    UDim2.new(
-                        0,
-                        0,
-                        0,
-                        210
-                    )
-
-                childControl.BackgroundColor3 =
-                    Color3.fromRGB(
-                        100,
-                        100,
-                        100
-                    )
-
-                childControl.BorderSizePixel =
-                    0
-
-                childControl.Text =
-                    "   "
-                    .. (
-                        data.ChildName
-                        or "Auto Execute"
-                    )
-
-                childControl.TextColor3 =
-                    Color3.fromRGB(
-                        255,
-                        255,
-                        255
-                    )
-
-                childControl.TextStrokeTransparency =
-                    1
-
-                childControl.TextSize =
-                    14
-
-                childControl.Font =
-                    Enum.Font.GothamBold
-
-                childControl.TextXAlignment =
-                    Enum.TextXAlignment.Left
-
-                childControl.Visible =
-                    expanded
-
-                local childCorner =
-                    Instance.new(
-                        "UICorner"
-                    )
-
-                childCorner.CornerRadius =
-                    UDim.new(
-                        0,
-                        8
-                    )
-
-                childCorner.Parent =
-                    childControl
-
-                local childLever =
-                    Instance.new(
-                        "Frame"
-                    )
-
-                childLever.Parent =
-                    childControl
-
-                childLever.Size =
-                    UDim2.new(
-                        0,
-                        65,
-                        0,
-                        28
-                    )
-
-                childLever.Position =
-                    UDim2.new(
-                        1,
-                        -75,
-                        0.5,
-                        -14
-                    )
-
-                childLever.BorderSizePixel =
-                    0
-
-                local childLeverCorner =
-                    Instance.new(
-                        "UICorner"
-                    )
-
-                childLeverCorner.CornerRadius =
-                    UDim.new(
-                        1,
-                        0
-                    )
-
-                childLeverCorner.Parent =
-                    childLever
-
-                local childLeverText =
-                    Instance.new(
-                        "TextLabel"
-                    )
-
-                childLeverText.Parent =
-                    childLever
-
-                childLeverText.Size =
-                    UDim2.new(
-                        1,
-                        0,
-                        1,
-                        0
-                    )
-
-                childLeverText.BackgroundTransparency =
-                    1
-
-                childLeverText.TextSize =
-                    12
-
-                childLeverText.Font =
-                    Enum.Font.GothamBold
-
-                childLeverText.TextColor3 =
-                    Color3.fromRGB(
-                        255,
-                        255,
-                        255
-                    )
-
-                childLeverText.TextXAlignment =
-                    Enum.TextXAlignment.Center
-
-                local childCircle =
-                    Instance.new(
-                        "Frame"
-                    )
-
-                childCircle.Parent =
-                    childLever
-
-                childCircle.Size =
-                    UDim2.new(
-                        0,
-                        22,
-                        0,
-                        22
-                    )
-
-                childCircle.BorderSizePixel =
-                    0
-
-                childCircle.BackgroundColor3 =
-                    Color3.fromRGB(
-                        255,
-                        255,
-                        255
-                    )
-
-                local childCircleCorner =
-                    Instance.new(
-                        "UICorner"
-                    )
-
-                childCircleCorner.CornerRadius =
-                    UDim.new(
-                        1,
-                        0
-                    )
-
-                childCircleCorner.Parent =
-                    childCircle
-
-                local function UpdateChildLever()
-
-                    if data.ChildEnabled then
-
-                        childLever.BackgroundColor3 =
-                            Color3.fromRGB(
-                                0,
-                                150,
-                                0
-                            )
-
-                        childLeverText.Text =
-                            "ON"
-
-                        childCircle.Position =
-                            UDim2.new(
-                                1,
-                                -25,
-                                0.5,
-                                -11
-                            )
-
-                    else
-
-                        childLever.BackgroundColor3 =
-                            Color3.fromRGB(
-                                70,
-                                70,
-                                70
-                            )
-
-                        childLeverText.Text =
-                            "OFF"
-
-                        childCircle.Position =
-                            UDim2.new(
-                                0,
-                                3,
-                                0.5,
-                                -11
-                            )
-                    end
-                end
-
-                UpdateChildLever()
-
-                childControl.MouseButton1Click:Connect(
-                    function()
-
-                        if data.Min
-                            and #data.Selected
-                                < data.Min then
-
-                            return
-                        end
-
-                        data.ChildEnabled =
-                            not data.ChildEnabled
-
-                        if data.ChildSave then
-
-                            SetSavedValue(
-                                data.ChildSaveKey,
-                                data.ChildEnabled
-                            )
-                        end
-
-                        UpdateChildLever()
-
-                        if typeof(
-                            data.ChildCallback
-                        ) == "function" then
-
-                            task.spawn(
-                                function()
-
-                                    pcall(
-                                        function()
-
-                                            data.ChildCallback(
-                                                data.ChildEnabled,
-                                                data.Selected
-                                            )
-
-                                        end
-                                    )
-                                end
-                            )
-                        end
-                    end
-                )
-
-                if data.ChildEnabled
-                    and #data.Selected > 0
+                if option
                     and typeof(
-                        data.ChildCallback
+                        option.Callback
                     ) == "function" then
 
                     task.spawn(
@@ -3484,16 +3188,355 @@ local function SelectTab(tab)
                             pcall(
                                 function()
 
-                                    data.ChildCallback(
-                                        true,
+                                    option.Callback(
+                                        selectedName,
                                         data.Selected
                                     )
+
                                 end
                             )
+
                         end
                     )
                 end
             end
+        end
+    )
+
+elseif data.ChildClick == "Lever" then
+
+    childControl =
+        Instance.new("TextButton")
+
+    childControl.Parent =
+        root
+
+    childControl.Size =
+        UDim2.new(
+            1,
+            0,
+            0,
+            childHeight
+        )
+
+    childControl.Position =
+        UDim2.new(
+            0,
+            0,
+            0,
+            childY
+        )
+
+    childControl.BackgroundColor3 =
+        Color3.fromRGB(
+            100,
+            100,
+            100
+        )
+
+    childControl.BackgroundTransparency =
+        0.05
+
+    childControl.BorderSizePixel =
+        0
+
+    childControl.Text =
+        "   "
+        .. (
+            data.ChildName
+            or "Auto Execute"
+        )
+
+    childControl.TextColor3 =
+        Color3.fromRGB(
+            255,
+            255,
+            255
+        )
+
+    childControl.TextStrokeTransparency =
+        1
+
+    childControl.TextSize =
+        14
+
+    childControl.Font =
+        Enum.Font.GothamBold
+
+    childControl.TextXAlignment =
+        Enum.TextXAlignment.Left
+
+    childControl.Visible =
+        expanded
+
+    local childCorner =
+        Instance.new("UICorner")
+
+    childCorner.CornerRadius =
+        UDim.new(
+            0,
+            8
+        )
+
+    childCorner.Parent =
+        childControl
+
+    local childStroke =
+        Instance.new("UIStroke")
+
+    childStroke.Color =
+        Color3.fromRGB(
+            120,
+            120,
+            120
+        )
+
+    childStroke.Thickness =
+        1
+
+    childStroke.Transparency =
+        0.25
+
+    childStroke.Parent =
+        childControl
+
+    local childLever =
+        Instance.new("Frame")
+
+    childLever.Parent =
+        childControl
+
+    childLever.Size =
+        UDim2.new(
+            0,
+            65,
+            0,
+            28
+        )
+
+    childLever.Position =
+        UDim2.new(
+            1,
+            -75,
+            0.5,
+            -14
+        )
+
+    childLever.BorderSizePixel =
+        0
+
+    local childLeverCorner =
+        Instance.new("UICorner")
+
+    childLeverCorner.CornerRadius =
+        UDim.new(
+            1,
+            0
+        )
+
+    childLeverCorner.Parent =
+        childLever
+
+    local childLeverStroke =
+        Instance.new("UIStroke")
+
+    childLeverStroke.Color =
+        Color3.fromRGB(
+            160,
+            160,
+            160
+        )
+
+    childLeverStroke.Thickness =
+        1
+
+    childLeverStroke.Parent =
+        childLever
+
+    local childLeverText =
+        Instance.new("TextLabel")
+
+    childLeverText.Parent =
+        childLever
+
+    childLeverText.Size =
+        UDim2.new(
+            1,
+            0,
+            1,
+            0
+        )
+
+    childLeverText.BackgroundTransparency =
+        1
+
+    childLeverText.TextSize =
+        12
+
+    childLeverText.Font =
+        Enum.Font.GothamBold
+
+    childLeverText.TextColor3 =
+        Color3.fromRGB(
+            255,
+            255,
+            255
+        )
+
+    childLeverText.TextXAlignment =
+        Enum.TextXAlignment.Center
+
+    local childCircle =
+        Instance.new("Frame")
+
+    childCircle.Parent =
+        childLever
+
+    childCircle.Size =
+        UDim2.new(
+            0,
+            22,
+            0,
+            22
+        )
+
+    childCircle.BorderSizePixel =
+        0
+
+    childCircle.BackgroundColor3 =
+        Color3.fromRGB(
+            255,
+            255,
+            255
+        )
+
+    local childCircleCorner =
+        Instance.new("UICorner")
+
+    childCircleCorner.CornerRadius =
+        UDim.new(
+            1,
+            0
+        )
+
+    childCircleCorner.Parent =
+        childCircle
+
+    local function UpdateChildLever()
+
+        if data.ChildEnabled then
+
+            childLever.BackgroundColor3 =
+                Color3.fromRGB(
+                    0,
+                    150,
+                    0
+                )
+
+            childLeverText.Text =
+                "ON"
+
+            childCircle.Position =
+                UDim2.new(
+                    1,
+                    -25,
+                    0.5,
+                    -11
+                )
+
+        else
+
+            childLever.BackgroundColor3 =
+                Color3.fromRGB(
+                    70,
+                    70,
+                    70
+                )
+
+            childLeverText.Text =
+                "OFF"
+
+            childCircle.Position =
+                UDim2.new(
+                    0,
+                    3,
+                    0.5,
+                    -11
+                )
+        end
+    end
+
+    UpdateChildLever()
+
+    childControl.MouseButton1Click:Connect(
+        function()
+
+            if data.Min
+                and #data.Selected < data.Min then
+
+                return
+            end
+
+            data.ChildEnabled =
+                not data.ChildEnabled
+
+            if data.ChildSave then
+
+                SetSavedValue(
+                    data.ChildSaveKey,
+                    data.ChildEnabled
+                )
+            end
+
+            UpdateChildLever()
+
+            if typeof(
+                data.ChildCallback
+            ) == "function" then
+
+                task.spawn(
+                    function()
+
+                        pcall(
+                            function()
+
+                                data.ChildCallback(
+                                    data.ChildEnabled,
+                                    data.Selected
+                                )
+
+                            end
+                        )
+
+                    end
+                )
+            end
+        end
+    )
+
+    if data.ChildEnabled
+        and #data.Selected > 0
+        and typeof(
+            data.ChildCallback
+        ) == "function" then
+
+        task.spawn(
+            function()
+
+                pcall(
+                    function()
+
+                        data.ChildCallback(
+                            true,
+                            data.Selected
+                        )
+
+                    end
+                )
+            end
+        )
+    end
+end
 
             --------------------------------------------------
             -- HEADER
