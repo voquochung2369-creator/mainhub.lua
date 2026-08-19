@@ -28,18 +28,18 @@ local Tabs = {
         Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/ESP.lua"
     },
 	
-    {
-        Name = "Test",
-        Slot = 3,
-        Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Test.lua"
-    },
-
 --    {
---        Name = "Setting",
---        Slot = 4,
---        Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Setting.lua"
---    }
---}
+--        Name = "Test",
+--        Slot = 3,
+ --       Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Test.lua"
+--    },
+
+    {
+        Name = "Setting",
+        Slot = 3,
+        Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Setting.lua"
+    }
+}
 
 --------------------------------------------------
 -- CREATE + LOAD
