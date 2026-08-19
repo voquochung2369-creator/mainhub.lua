@@ -28,7 +28,7 @@ if not Test then
 end
 
 
-Test({
+Test:AddButton({
 
     Name = "Auto Join Team",
     Click = "Scroll",
