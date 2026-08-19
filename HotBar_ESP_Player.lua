@@ -2,62 +2,92 @@ repeat
     task.wait()
 until game:IsLoaded()
 
+
 task.wait(5)
+
 
 
 local Players =
     game:GetService("Players")
 
+
 local RunService =
     game:GetService("RunService")
+
 
 
 local LocalPlayer =
     Players.LocalPlayer
 
 
+
 local ESPEnabled =
     false
 
 
-local ESPFolder =
-    Instance.new("Folder")
 
-ESPFolder.Name =
-    "CustomHub_PlayerESP"
-
-ESPFolder.Parent =
-    workspace
+local ESPObjects =
+    {}
 
 
+
+--------------------------------------------------
+-- CLEAR ESP
+--------------------------------------------------
 
 local function ClearESP()
 
-    for _, v in ipairs(
-        ESPFolder:GetChildren()
+
+    for _, object in ipairs(
+        ESPObjects
     ) do
 
-        v:Destroy()
+
+        pcall(function()
+
+            object:Destroy()
+
+        end)
 
     end
+
+
+    table.clear(
+        ESPObjects
+    )
 
 end
 
 
 
-local function CreateESP(player)
+--------------------------------------------------
+-- CREATE ESP
+--------------------------------------------------
 
-    if player == LocalPlayer then
+local function CreateESP(
+    player
+)
+
+
+    if player ==
+        LocalPlayer then
+
         return
+
     end
+
 
 
     local character =
         player.Character
 
+
     if not character then
+
         return
+
     end
+
 
 
     local root =
@@ -65,42 +95,42 @@ local function CreateESP(player)
             "HumanoidRootPart"
         )
 
+
     local humanoid =
         character:FindFirstChild(
             "Humanoid"
         )
 
 
-    if not root or not humanoid then
+
+    if not root
+        or not humanoid then
+
         return
+
     end
 
 
 
-    -- BOX
+    --------------------------------------------------
+    -- BODY GLOW
+    --------------------------------------------------
 
-    local box =
+
+    local highlight =
         Instance.new(
-            "BoxHandleAdornment"
-        )
-
-    box.Name =
-        player.Name.."_Box"
-
-
-    box.Adornee =
-        root
-
-
-    box.Size =
-        Vector3.new(
-            4,
-            6,
-            2
+            "Highlight"
         )
 
 
-    box.Color3 =
+    highlight.Name =
+        "ESP_Glow_"
+        ..
+        player.Name
+
+
+
+    highlight.FillColor =
         Color3.fromRGB(
             255,
             0,
@@ -108,24 +138,53 @@ local function CreateESP(player)
         )
 
 
-    box.Transparency =
-        0.45
 
-
-    box.AlwaysOnTop =
-        true
-
-
-    box.ZIndex =
-        10
-
-
-    box.Parent =
-        ESPFolder
+    highlight.OutlineColor =
+        Color3.fromRGB(
+            255,
+            255,
+            255
+        )
 
 
 
-    -- INFO TEXT
+    highlight.FillTransparency =
+        0.15
+
+
+
+    highlight.OutlineTransparency =
+        0
+
+
+
+    highlight.DepthMode =
+        Enum.HighlightDepthMode.AlwaysOnTop
+
+
+
+    highlight.Adornee =
+        character
+
+
+
+    highlight.Parent =
+        character
+
+
+
+    table.insert(
+        ESPObjects,
+        highlight
+    )
+
+
+
+
+    --------------------------------------------------
+    -- NAME DISTANCE HEALTH
+    --------------------------------------------------
+
 
     local gui =
         Instance.new(
@@ -134,20 +193,25 @@ local function CreateESP(player)
 
 
     gui.Name =
-        player.Name.."_Info"
+        "ESP_Info_"
+        ..
+        player.Name
+
 
 
     gui.Adornee =
         root
 
 
+
     gui.Size =
         UDim2.new(
             0,
-            250,
+            220,
             0,
-            80
+            90
         )
+
 
 
     gui.StudsOffset =
@@ -158,12 +222,21 @@ local function CreateESP(player)
         )
 
 
+
     gui.AlwaysOnTop =
         true
 
 
+
     gui.Parent =
-        ESPFolder
+        game.CoreGui
+
+
+
+    table.insert(
+        ESPObjects,
+        gui
+    )
 
 
 
@@ -182,8 +255,10 @@ local function CreateESP(player)
         )
 
 
+
     text.BackgroundTransparency =
         1
+
 
 
     text.TextColor3 =
@@ -194,16 +269,29 @@ local function CreateESP(player)
         )
 
 
+
+    text.TextStrokeColor3 =
+        Color3.fromRGB(
+            0,
+            0,
+            0
+        )
+
+
+
     text.TextStrokeTransparency =
         0
+
 
 
     text.TextSize =
         16
 
 
+
     text.Font =
         Enum.Font.GothamBold
+
 
 
     text.Parent =
@@ -211,41 +299,60 @@ local function CreateESP(player)
 
 
 
+
+    --------------------------------------------------
+    -- UPDATE TEXT
+    --------------------------------------------------
+
+
     local connection
+
 
     connection =
         RunService.RenderStepped:Connect(
             function()
 
+
                 if not ESPEnabled then
+
 
                     connection:Disconnect()
 
+
                     return
+
                 end
+
 
 
                 if not character.Parent then
 
+
                     connection:Disconnect()
 
+
                     return
+
                 end
 
 
 
-                local myChar =
+                local myCharacter =
                     LocalPlayer.Character
 
 
+
                 local myRoot =
-                    myChar
-                    and myChar:FindFirstChild(
+                    myCharacter
+                    and myCharacter:FindFirstChild(
                         "HumanoidRootPart"
                     )
 
 
+
                 if myRoot then
+
+
 
                     local distance =
                         math.floor(
@@ -257,16 +364,19 @@ local function CreateESP(player)
                         )
 
 
-                    local hp =
+
+                    local health =
                         math.floor(
                             humanoid.Health
                         )
 
 
-                    local maxHp =
+
+                    local maxHealth =
                         math.floor(
                             humanoid.MaxHealth
                         )
+
 
 
                     text.Text =
@@ -280,15 +390,17 @@ local function CreateESP(player)
                         ..
                         "\n"
                         ..
-                        hp
+                        health
                         ..
                         "/"
                         ..
-                        maxHp
+                        maxHealth
                         ..
                         " Health"
 
+
                 end
+
 
             end
         )
@@ -297,14 +409,24 @@ end
 
 
 
-local function RefreshESP()
+
+--------------------------------------------------
+-- UPDATE ALL
+--------------------------------------------------
+
+local function UpdateESP()
+
 
     ClearESP()
 
 
+
     if not ESPEnabled then
+
         return
+
     end
+
 
 
     for _, player in ipairs(
@@ -312,28 +434,10 @@ local function RefreshESP()
     ) do
 
 
-        if player.Character then
-
-            CreateESP(player)
-
-        end
-
-
-        player.CharacterAdded:Connect(
-            function()
-
-                task.wait(1)
-
-                if ESPEnabled then
-
-                    CreateESP(
-                        player
-                    )
-
-                end
-
-            end
+        CreateESP(
+            player
         )
+
 
     end
 
@@ -341,33 +445,84 @@ end
 
 
 
+
+--------------------------------------------------
+-- PLAYER JOIN
+--------------------------------------------------
+
 Players.PlayerAdded:Connect(
     function(player)
+
 
         player.CharacterAdded:Connect(
             function()
 
+
                 task.wait(1)
 
-                RefreshESP()
+
+
+                if ESPEnabled then
+
+
+                    CreateESP(
+                        player
+                    )
+
+
+                end
+
 
             end
         )
+
 
     end
 )
 
 
 
+
+--------------------------------------------------
+-- API FOR HUB
+--------------------------------------------------
+
 _G.CustomHubESP = {
 
+
     Toggle =
-        function(state)
+        function(
+            state
+        )
+
 
             ESPEnabled =
                 state
 
-            RefreshESP()
+
+
+            if not state then
+
+
+                ClearESP()
+
+
+                return
+
+            end
+
+
+
+            UpdateESP()
+
+
 
         end
+
 }
+
+
+
+warn(
+    "CustomHub ESP Player Loaded"
+)
