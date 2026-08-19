@@ -39,7 +39,7 @@ Test:AddButton({
         1,
     Default = false,
     Min =
-        1,
+        0,
 
     Max =
         1,
