@@ -26,7 +26,7 @@ end
 
 Test:AddButton({
 
-    Name = "Team",
+    Name = "Auto Join Team",
     Click = "Scroll",
     Slot = 1,
     Default = false,
@@ -73,7 +73,7 @@ Test:AddButton({
 
 
     ChildClick = "Lever",
-    ChildName = "Auto Team",
+    ChildName = "Auto Join Team",
     ChildSave = true,
     ChildDefault = false,
     ChildCallback =
