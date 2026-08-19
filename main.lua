@@ -2361,32 +2361,32 @@ local function SelectTab(tab)
         -- HEIGHT
         --------------------------------------------------
 
-        local function GetRootHeight()
+local function GetRootHeight()
 
-            local height =
-                HEADER_HEIGHT
+    local height =
+        HEADER_HEIGHT
 
-            if data.Expanded then
+    if data.Expanded then
 
-                height =
-                    height
-                    + GAP
-                    + SCROLL_HEIGHT
+        height =
+            height
+            + GAP
+            + SCROLL_HEIGHT
+    end
 
-                if data.ChildClick
-                    == "Button"
-                    or data.ChildClick
-                    == "Lever" then
+    if data.ChildClick
+        == "Button"
+        or data.ChildClick
+        == "Lever" then
 
-                    height =
-                        height
-                        + GAP
-                        + CHILD_HEIGHT
-                end
-            end
+        height =
+            height
+            + GAP
+            + CHILD_HEIGHT
+    end
 
-            return height
-        end
+    return height
+end
 
         root.Size =
             UDim2.new(
@@ -3018,33 +3018,29 @@ local function SelectTab(tab)
 
         UpdateInnerScroll()
 
-        --------------------------------------------------
-        -- CHILD CONTROL
-        --
-        -- QUAN TRỌNG:
-        -- ChildClick nằm trong ROOT
-        -- nhưng KHÔNG nằm trong scrollFrame
-        --------------------------------------------------
+--------------------------------------------------
+-- CHILD CONTROL
+--------------------------------------------------
 
-        local childControl = nil
+local childControl = nil
 
-        local function UpdateChildPosition()
+local function UpdateChildPosition()
 
-            if not childControl then
-                return
-            end
+    if not childControl then
+        return
+    end
 
-            childControl.Position =
-                UDim2.new(
-                    1,
-                    -100,
-                    0,
-                    HEADER_HEIGHT
-                    + GAP
-                    + SCROLL_HEIGHT
-                    + GAP
-                )
-        end
+    childControl.Position =
+        UDim2.new(
+            1,
+            -100,
+            0,
+            HEADER_HEIGHT
+                + GAP
+                + SCROLL_HEIGHT
+                + GAP
+        )
+end
 
         --------------------------------------------------
         -- CHILD BUTTON
@@ -3103,7 +3099,7 @@ local function SelectTab(tab)
                 Enum.Font.GothamBold
 
             childControl.Visible =
-                expanded
+                true
 
             UpdateChildPosition()
 
@@ -3268,7 +3264,7 @@ local function SelectTab(tab)
                 Enum.TextXAlignment.Left
 
             childControl.Visible =
-                expanded
+                true
 
             UpdateChildPosition()
 
@@ -3533,74 +3529,61 @@ local function SelectTab(tab)
         -- HEADER CLICK
         --------------------------------------------------
 
-        header.MouseButton1Click:Connect(
-            function()
+header.MouseButton1Click:Connect(
+    function()
 
-                data.Expanded =
-                    not data.Expanded
+        data.Expanded =
+            not data.Expanded
 
-                if data.Expanded then
+        --------------------------------------------------
+        -- UPDATE ROOT HEIGHT
+        --------------------------------------------------
 
-                    --------------------------------------------------
-                    -- MỞ
-                    --------------------------------------------------
+        root.Size =
+            UDim2.new(
+                1,
+                0,
+                0,
+                GetRootHeight()
+            )
 
-                    root.Size =
-                        UDim2.new(
-                            1,
-                            0,
-                            0,
-                            GetRootHeight()
-                        )
+        --------------------------------------------------
+        -- SCROLL
+        --------------------------------------------------
 
-                    scrollFrame.Visible =
-                        true
+        scrollFrame.Visible =
+            data.Expanded
 
-                    if childControl then
+        --------------------------------------------------
+        -- CHILD CLICK
+        -- Luôn nằm bên dưới ScrollFrame
+        -- và luôn hiển thị
+        --------------------------------------------------
 
-                        -- ChildClick vẫn độc lập
-                        -- với ScrollFrame
-                        childControl.Visible =
-                            true
+        if childControl then
 
-                        UpdateChildPosition()
-                    end
+            childControl.Visible =
+                true
 
-                    arrow.Text =
-                        "▲"
+            UpdateChildPosition()
+        end
 
-                else
+        --------------------------------------------------
+        -- ARROW
+        --------------------------------------------------
 
-                    --------------------------------------------------
-                    -- ĐÓNG
-                    --------------------------------------------------
+        arrow.Text =
+            data.Expanded
+            and "▲"
+            or "▼"
 
-                    root.Size =
-                        UDim2.new(
-                            1,
-                            0,
-                            0,
-                            HEADER_HEIGHT
-                        )
+        --------------------------------------------------
+        -- UPDATE MAIN SCROLL
+        --------------------------------------------------
 
-                    scrollFrame.Visible =
-                        false
-
-                    -- KHÔNG cho ChildClick tự chui vào ScrollFrame
-                    -- và không bị CanvasPosition ảnh hưởng
-                    if childControl then
-
-                        childControl.Visible =
-                            false
-                    end
-
-                    arrow.Text =
-                        "▼"
-                end
-
-                UpdateMainScroll()
-            end
-        )
+        UpdateMainScroll()
+    end
+)
     end
     end
 
