@@ -14,11 +14,8 @@ task.wait(5)
 local Players =
     game:GetService("Players")
 
-
 local RunService =
     game:GetService("RunService")
-
-
 
 local LocalPlayer =
     Players.LocalPlayer
@@ -26,7 +23,7 @@ local LocalPlayer =
 
 
 --------------------------------------------------
--- REMOVE OLD ESP
+-- CLOSE OLD ESP
 --------------------------------------------------
 
 if _G.CustomHubESP then
@@ -59,9 +56,8 @@ local Connections =
 
 
 
-
 --------------------------------------------------
--- CLEAR ALL ESP
+-- CLEAR ESP
 --------------------------------------------------
 
 local function ClearESP()
@@ -71,8 +67,6 @@ local function ClearESP()
         false
 
 
-
-    -- Remove saved objects
 
     for _, obj in pairs(
         ESPObjects
@@ -96,9 +90,6 @@ local function ClearESP()
 
 
 
-
-    -- Disconnect loops
-
     for _, con in pairs(
         Connections
     ) do
@@ -121,8 +112,7 @@ local function ClearESP()
 
 
 
-
-    -- Remove Highlight left behind
+    -- Xóa Highlight còn sót
 
     for _, player in ipairs(
         Players:GetPlayers()
@@ -131,7 +121,6 @@ local function ClearESP()
 
         local char =
             player.Character
-
 
 
         if char then
@@ -165,9 +154,7 @@ local function ClearESP()
 
 
 
-
-
-    -- Remove text ESP
+    -- Xóa Billboard còn sót
 
     pcall(function()
 
@@ -193,7 +180,6 @@ local function ClearESP()
 
 
     end)
-
 
 
 end
@@ -234,7 +220,6 @@ local function CreateESP(
         )
 
 
-
     local humanoid =
         character:FindFirstChild(
             "Humanoid"
@@ -251,23 +236,81 @@ local function CreateESP(
 
 
 
+    local dead =
+        false
 
-    local self =
-        player == LocalPlayer
+
+
+    local highlight
+
+
+
+    local gui
 
 
 
 
 
     --------------------------------------------------
-    -- OUTLINE
+    -- REMOVE ON DEATH
     --------------------------------------------------
 
-    local highlight =
+    local deathConnection
+
+
+    deathConnection =
+        humanoid.Died:Connect(
+            function()
+
+
+                dead =
+                    true
+
+
+
+                if highlight then
+
+
+                    highlight:Destroy()
+
+
+                end
+
+
+
+                if gui then
+
+
+                    gui:Destroy()
+
+
+                end
+
+
+
+            end
+        )
+
+
+
+    table.insert(
+        Connections,
+        deathConnection
+    )
+
+
+
+
+
+
+    --------------------------------------------------
+    -- HIGHLIGHT
+    --------------------------------------------------
+
+    highlight =
         Instance.new(
             "Highlight"
         )
-
 
 
     highlight.Name =
@@ -295,8 +338,7 @@ local function CreateESP(
 
 
 
-
-    if self then
+    if player == LocalPlayer then
 
 
         highlight.OutlineColor =
@@ -336,9 +378,9 @@ local function CreateESP(
 
 
 
-    -- Không tạo text cho bản thân
+    -- Không hiện text bản thân
 
-    if self then
+    if player == LocalPlayer then
 
         return
 
@@ -349,14 +391,13 @@ local function CreateESP(
 
 
     --------------------------------------------------
-    -- TEXT INFO
+    -- INFO
     --------------------------------------------------
 
-    local gui =
+    gui =
         Instance.new(
             "BillboardGui"
         )
-
 
 
     gui.Name =
@@ -398,12 +439,10 @@ local function CreateESP(
 
 
 
-
     table.insert(
         ESPObjects,
         gui
     )
-
 
 
 
@@ -423,10 +462,8 @@ local function CreateESP(
         )
 
 
-
     text.BackgroundTransparency =
         1
-
 
 
     text.TextColor3 =
@@ -437,20 +474,16 @@ local function CreateESP(
         )
 
 
-
     text.TextStrokeTransparency =
         0
-
 
 
     text.TextSize =
         16
 
 
-
     text.Font =
         Enum.Font.GothamBold
-
 
 
     text.Parent =
@@ -460,19 +493,40 @@ local function CreateESP(
 
 
 
-    local connection
+    --------------------------------------------------
+    -- UPDATE TEXT
+    --------------------------------------------------
+
+    local updateConnection
 
 
-
-    connection =
+    updateConnection =
         RunService.RenderStepped:Connect(
             function()
 
 
-                if not ESPEnabled then
+                if not ESPEnabled
+                or dead
+                or humanoid.Health <= 0
+                or not character.Parent then
 
 
-                    connection:Disconnect()
+                    if gui then
+
+                        gui:Destroy()
+
+                    end
+
+
+                    if highlight then
+
+                        highlight:Destroy()
+
+                    end
+
+
+
+                    updateConnection:Disconnect()
 
 
                     return
@@ -482,28 +536,15 @@ local function CreateESP(
 
 
 
-                if not character.Parent then
 
-
-                    connection:Disconnect()
-
-
-                    return
-
-                end
-
-
-
-
-
-                local myChar =
+                local myCharacter =
                     LocalPlayer.Character
 
 
 
                 local myRoot =
-                    myChar
-                    and myChar:FindFirstChild(
+                    myCharacter
+                    and myCharacter:FindFirstChild(
                         "HumanoidRootPart"
                     )
 
@@ -547,7 +588,6 @@ local function CreateESP(
                         " Health"
 
 
-
                 end
 
 
@@ -558,7 +598,7 @@ local function CreateESP(
 
     table.insert(
         Connections,
-        connection
+        updateConnection
     )
 
 
@@ -568,9 +608,8 @@ end
 
 
 
-
 --------------------------------------------------
--- UPDATE
+-- UPDATE ALL
 --------------------------------------------------
 
 local function UpdateESP()
@@ -603,9 +642,8 @@ end
 
 
 
-
 --------------------------------------------------
--- NEW PLAYER
+-- PLAYER JOIN
 --------------------------------------------------
 
 Players.PlayerAdded:Connect(
@@ -632,6 +670,47 @@ Players.PlayerAdded:Connect(
 
             end
         )
+
+
+    end
+)
+
+
+
+
+
+--------------------------------------------------
+-- PLAYER LEAVE
+--------------------------------------------------
+
+Players.PlayerRemoving:Connect(
+    function(player)
+
+
+        for _, obj in pairs(
+            ESPObjects
+        ) do
+
+
+            pcall(function()
+
+
+                if string.find(
+                    obj.Name,
+                    player.Name
+                ) then
+
+
+                    obj:Destroy()
+
+
+                end
+
+
+            end)
+
+
+        end
 
 
     end
@@ -686,10 +765,7 @@ _G.CustomHubESP = {
 
         end
 
-
 }
-
-
 
 
 
