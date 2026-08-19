@@ -2,10 +2,6 @@ repeat
     task.wait()
 until game:IsLoaded()
 
-
-task.wait(5)
-
-
 local Players =
     game:GetService("Players")
 
@@ -20,6 +16,22 @@ local LocalPlayer =
 
 
 
+--------------------------------------------------
+-- REMOVE OLD ESP
+--------------------------------------------------
+
+if _G.CustomHubESP then
+
+    pcall(function()
+
+        _G.CustomHubESP.Close()
+
+    end)
+
+end
+
+
+
 local ESPEnabled =
     false
 
@@ -30,17 +42,21 @@ local ESPObjects =
 
 
 
+local Connections =
+    {}
+
+
+
 --------------------------------------------------
--- CLEAR ESP
+-- CLEAR
 --------------------------------------------------
 
 local function ClearESP()
 
 
-    for _, obj in ipairs(
+    for _, obj in pairs(
         ESPObjects
     ) do
-
 
         pcall(function()
 
@@ -55,6 +71,26 @@ local function ClearESP()
         ESPObjects
     )
 
+
+
+    for _, con in pairs(
+        Connections
+    ) do
+
+        pcall(function()
+
+            con:Disconnect()
+
+        end)
+
+    end
+
+
+    table.clear(
+        Connections
+    )
+
+
 end
 
 
@@ -67,6 +103,12 @@ end
 local function CreateESP(
     player
 )
+
+
+    if not ESPEnabled then
+        return
+    end
+
 
 
     local character =
@@ -91,12 +133,9 @@ local function CreateESP(
         )
 
 
-
     if not root
     or not humanoid then
-
         return
-
     end
 
 
@@ -107,7 +146,7 @@ local function CreateESP(
 
 
     --------------------------------------------------
-    -- BODY GLOW
+    -- OUTLINE ONLY
     --------------------------------------------------
 
     local highlight =
@@ -117,49 +156,17 @@ local function CreateESP(
 
 
     highlight.Name =
-        "ESP_Glow_"
-        ..
-        player.Name
+        "ESP_"..player.Name
 
 
 
-    if IsSelf then
-
-
-        highlight.FillColor =
-            Color3.fromRGB(
-                0,
-                255,
-                255
-            )
-
-
-    else
-
-
-        highlight.FillColor =
-            Color3.fromRGB(
-                255,
-                0,
-                255
-            )
-
-
-    end
-
-
-
-    highlight.OutlineColor =
-        Color3.fromRGB(
-            255,
-            255,
-            255
-        )
+    highlight.Adornee =
+        character
 
 
 
     highlight.FillTransparency =
-        0.15
+        1
 
 
 
@@ -173,8 +180,29 @@ local function CreateESP(
 
 
 
-    highlight.Adornee =
-        character
+    if IsSelf then
+
+
+        highlight.OutlineColor =
+            Color3.fromRGB(
+                170,
+                0,
+                255
+            )
+
+
+    else
+
+
+        highlight.OutlineColor =
+            Color3.fromRGB(
+                255,
+                0,
+                255
+            )
+
+
+    end
 
 
 
@@ -190,22 +218,19 @@ local function CreateESP(
 
 
 
-
     --------------------------------------------------
-    -- KHÔNG TẠO TEXT CHO BẢN THÂN
+    -- DON'T SHOW SELF TEXT
     --------------------------------------------------
 
     if IsSelf then
-
         return
-
     end
 
 
 
 
     --------------------------------------------------
-    -- NAME DISTANCE HEALTH
+    -- INFO TEXT
     --------------------------------------------------
 
     local gui =
@@ -214,11 +239,8 @@ local function CreateESP(
         )
 
 
-
     gui.Name =
-        "ESP_Info_"
-        ..
-        player.Name
+        "ESP_INFO_"..player.Name
 
 
 
@@ -232,7 +254,7 @@ local function CreateESP(
             0,
             220,
             0,
-            90
+            80
         )
 
 
@@ -243,7 +265,6 @@ local function CreateESP(
             4,
             0
         )
-
 
 
     gui.AlwaysOnTop =
@@ -263,15 +284,13 @@ local function CreateESP(
 
 
 
-
-    local text =
+    local label =
         Instance.new(
             "TextLabel"
         )
 
 
-
-    text.Size =
+    label.Size =
         UDim2.new(
             1,
             0,
@@ -281,12 +300,12 @@ local function CreateESP(
 
 
 
-    text.BackgroundTransparency =
+    label.BackgroundTransparency =
         1
 
 
 
-    text.TextColor3 =
+    label.TextColor3 =
         Color3.fromRGB(
             255,
             0,
@@ -294,45 +313,29 @@ local function CreateESP(
         )
 
 
-
-    text.TextStrokeColor3 =
-        Color3.fromRGB(
-            0,
-            0,
-            0
-        )
-
-
-
-    text.TextStrokeTransparency =
+    label.TextStrokeTransparency =
         0
 
 
-
-    text.TextSize =
+    label.TextSize =
         16
 
 
-
-    text.Font =
+    label.Font =
         Enum.Font.GothamBold
 
 
 
-    text.Parent =
+    label.Parent =
         gui
 
 
 
 
-    --------------------------------------------------
-    -- UPDATE INFO
-    --------------------------------------------------
-
-    local connection
+    local con
 
 
-    connection =
+    con =
         RunService.RenderStepped:Connect(
             function()
 
@@ -340,7 +343,7 @@ local function CreateESP(
                 if not ESPEnabled then
 
 
-                    connection:Disconnect()
+                    con:Disconnect()
 
 
                     return
@@ -352,7 +355,7 @@ local function CreateESP(
                 if not character.Parent then
 
 
-                    connection:Disconnect()
+                    con:Disconnect()
 
 
                     return
@@ -361,14 +364,14 @@ local function CreateESP(
 
 
 
-                local myCharacter =
+                local myChar =
                     LocalPlayer.Character
 
 
 
                 local myRoot =
-                    myCharacter
-                    and myCharacter:FindFirstChild(
+                    myChar
+                    and myChar:FindFirstChild(
                         "HumanoidRootPart"
                     )
 
@@ -388,21 +391,7 @@ local function CreateESP(
 
 
 
-                    local hp =
-                        math.floor(
-                            humanoid.Health
-                        )
-
-
-
-                    local maxhp =
-                        math.floor(
-                            humanoid.MaxHealth
-                        )
-
-
-
-                    text.Text =
+                    label.Text =
                         player.Name
                         ..
                         "\n"
@@ -413,11 +402,15 @@ local function CreateESP(
                         ..
                         "\n"
                         ..
-                        hp
+                        math.floor(
+                            humanoid.Health
+                        )
                         ..
                         "/"
                         ..
-                        maxhp
+                        math.floor(
+                            humanoid.MaxHealth
+                        )
                         ..
                         " Health"
 
@@ -428,13 +421,20 @@ local function CreateESP(
             end
         )
 
+
+    table.insert(
+        Connections,
+        con
+    )
+
+
 end
 
 
 
 
 --------------------------------------------------
--- UPDATE ALL ESP
+-- UPDATE
 --------------------------------------------------
 
 local function UpdateESP()
@@ -443,11 +443,8 @@ local function UpdateESP()
     ClearESP()
 
 
-
     if not ESPEnabled then
-
         return
-
     end
 
 
@@ -461,7 +458,6 @@ local function UpdateESP()
             player
         )
 
-
     end
 
 end
@@ -470,7 +466,7 @@ end
 
 
 --------------------------------------------------
--- PLAYER JOIN
+-- CHARACTER LOAD
 --------------------------------------------------
 
 Players.PlayerAdded:Connect(
@@ -482,7 +478,6 @@ Players.PlayerAdded:Connect(
 
 
                 task.wait(1)
-
 
 
                 if ESPEnabled then
@@ -505,7 +500,7 @@ Players.PlayerAdded:Connect(
 
 
 --------------------------------------------------
--- API HUB
+-- HUB CONTROL
 --------------------------------------------------
 
 _G.CustomHubESP = {
@@ -522,19 +517,19 @@ _G.CustomHubESP = {
 
 
 
-            if not state then
+            if state then
+
+
+                UpdateESP()
+
+
+            else
 
 
                 ClearESP()
 
 
-                return
-
             end
-
-
-
-            UpdateESP()
 
 
         end,
@@ -559,5 +554,5 @@ _G.CustomHubESP = {
 
 
 warn(
-    "CustomHub ESP Player Loaded"
+    "ESP Player Loaded"
 )
