@@ -6,7 +6,6 @@ until game:IsLoaded()
 task.wait(5)
 
 
-
 local Players =
     game:GetService("Players")
 
@@ -38,14 +37,14 @@ local ESPObjects =
 local function ClearESP()
 
 
-    for _, object in ipairs(
+    for _, obj in ipairs(
         ESPObjects
     ) do
 
 
         pcall(function()
 
-            object:Destroy()
+            obj:Destroy()
 
         end)
 
@@ -60,6 +59,7 @@ end
 
 
 
+
 --------------------------------------------------
 -- CREATE ESP
 --------------------------------------------------
@@ -69,23 +69,12 @@ local function CreateESP(
 )
 
 
-    if player ==
-        LocalPlayer then
-
-        return
-
-    end
-
-
-
     local character =
         player.Character
 
 
     if not character then
-
         return
-
     end
 
 
@@ -104,7 +93,7 @@ local function CreateESP(
 
 
     if not root
-        or not humanoid then
+    or not humanoid then
 
         return
 
@@ -112,10 +101,14 @@ local function CreateESP(
 
 
 
+    local IsSelf =
+        player == LocalPlayer
+
+
+
     --------------------------------------------------
     -- BODY GLOW
     --------------------------------------------------
-
 
     local highlight =
         Instance.new(
@@ -130,12 +123,29 @@ local function CreateESP(
 
 
 
-    highlight.FillColor =
-        Color3.fromRGB(
-            255,
-            0,
-            255
-        )
+    if IsSelf then
+
+
+        highlight.FillColor =
+            Color3.fromRGB(
+                0,
+                255,
+                255
+            )
+
+
+    else
+
+
+        highlight.FillColor =
+            Color3.fromRGB(
+                255,
+                0,
+                255
+            )
+
+
+    end
 
 
 
@@ -182,14 +192,27 @@ local function CreateESP(
 
 
     --------------------------------------------------
-    -- NAME DISTANCE HEALTH
+    -- KHÔNG TẠO TEXT CHO BẢN THÂN
     --------------------------------------------------
 
+    if IsSelf then
+
+        return
+
+    end
+
+
+
+
+    --------------------------------------------------
+    -- NAME DISTANCE HEALTH
+    --------------------------------------------------
 
     local gui =
         Instance.new(
             "BillboardGui"
         )
+
 
 
     gui.Name =
@@ -240,10 +263,12 @@ local function CreateESP(
 
 
 
+
     local text =
         Instance.new(
             "TextLabel"
         )
+
 
 
     text.Size =
@@ -301,9 +326,8 @@ local function CreateESP(
 
 
     --------------------------------------------------
-    -- UPDATE TEXT
+    -- UPDATE INFO
     --------------------------------------------------
-
 
     local connection
 
@@ -353,7 +377,6 @@ local function CreateESP(
                 if myRoot then
 
 
-
                     local distance =
                         math.floor(
                             (
@@ -365,14 +388,14 @@ local function CreateESP(
 
 
 
-                    local health =
+                    local hp =
                         math.floor(
                             humanoid.Health
                         )
 
 
 
-                    local maxHealth =
+                    local maxhp =
                         math.floor(
                             humanoid.MaxHealth
                         )
@@ -390,11 +413,11 @@ local function CreateESP(
                         ..
                         "\n"
                         ..
-                        health
+                        hp
                         ..
                         "/"
                         ..
-                        maxHealth
+                        maxhp
                         ..
                         " Health"
 
@@ -411,7 +434,7 @@ end
 
 
 --------------------------------------------------
--- UPDATE ALL
+-- UPDATE ALL ESP
 --------------------------------------------------
 
 local function UpdateESP()
@@ -469,13 +492,11 @@ Players.PlayerAdded:Connect(
                         player
                     )
 
-
                 end
 
 
             end
         )
-
 
     end
 )
@@ -484,7 +505,7 @@ Players.PlayerAdded:Connect(
 
 
 --------------------------------------------------
--- API FOR HUB
+-- API HUB
 --------------------------------------------------
 
 _G.CustomHubESP = {
@@ -515,6 +536,20 @@ _G.CustomHubESP = {
 
             UpdateESP()
 
+
+        end,
+
+
+
+    Close =
+        function()
+
+
+            ESPEnabled =
+                false
+
+
+            ClearESP()
 
 
         end
