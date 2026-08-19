@@ -52,21 +52,7 @@ Test:AddButton({
         function(
             Value
         )
-
-            if Value then
-
-                local success, result =
-                    pcall(
-                        function()
-
-                            local source =
                                 getgenv().Team = "Marines"
-                                )
-                            local fn =
-                                loadstring(
-                                    source
-                                )
-
                             if type(fn)
                                 ~= "function" then
 
