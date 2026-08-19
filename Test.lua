@@ -33,78 +33,43 @@ Test:AddButton({
     Min = 0,
     Max = 1,
     Save = true,
-    Options = {
+Options = {
 
-        {
+    {
+        Name = "Marines",
 
-            Name =
-                "Marines",
+        Callback = function()
 
-            Callback =
-                function(
-                    Name,
-                    Selected
+            getgenv().Team = "Marines"
+
+            game:GetService("ReplicatedStorage")
+                .Remotes
+                .CommF_:InvokeServer(
+                    "SetTeam",
+                    "Marines"
                 )
 
-                    getgenv().Team =
-                        "Marines"
-
-                end
-        },
-
-
-        {
-
-            Name =
-                "Pirates",
-
-            Callback =
-                function(
-                    Name,
-                    Selected
-                )
-
-                    getgenv().Team =
-                        "Pirates"
-
-                end
-        }
+        end
     },
 
 
-    ChildClick = "Lever",
-    ChildName = "Auto Join Team",
-    ChildSave = true,
-    ChildDefault = false,
-    ChildCallback =
-        function(
-            Enabled,
-            Selected
-        )
+    {
+        Name = "Pirates",
 
+        Callback = function()
 
-            if Enabled then
+            getgenv().Team = "Pirates"
 
-
-                if Selected[1]
-                    == "Marines" then
-
-
-                    getgenv().Team =
-                        "Marines"
-
-
-                elseif Selected[1]
-                    == "Pirates" then
-
-
-                    getgenv().Team =
-                        "Pirates"
-
-
-                end
-
-            end
+            game:GetService("ReplicatedStorage")
+                .Remotes
+                .CommF_:InvokeServer(
+                    "SetTeam",
+                    "Pirates"
+                )
 
         end
+    }
+}
+end
+end
 })
