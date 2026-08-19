@@ -1,79 +1,138 @@
-local Hub =
-    _G.CustomHub
+local Hub = _G.CustomHub
 
 if not Hub then
-
-    warn(
-        "CustomHub Main.lua chưa được load"
-    )
-
+    warn("CustomHub Main.lua chưa được load")
     return
 end
 
-local Window =
-    Hub.Window
+local Window = Hub.Window
 
-local Test = Window({
-    Name = "Test",
-    Slot = 1
-})
 
-Test:AddButton({
+local Test = nil
 
-    Name = "Team",
-    Click = "Scroll",
+for _, tab in ipairs(Window.Tabs) do
 
-    Save = true,
-    Default = false,
+    if tab.Name == "Test" then
 
-    Min = 1,
-    Max = 1,
+        Test = tab
+
+        break
+    end
+end
+
+
+if not Test then
+
+    warn("Không tìm thấy tab Test")
+    return
+end
+
+
+Test({
+
+    Name =
+        "Team",
+
+    Click =
+        "Scroll",
+
+    Slot =
+        1,
+
+    Min =
+        1,
+
+    Max =
+        1,
+
+    Save =
+        true,
+
 
     Options = {
+
         {
-            Name = "Marines",
 
-            Callback = function()
+            Name =
+                "Marines",
 
-                getgenv().Team = "Marines"
+            Callback =
+                function(
+                    Name,
+                    Selected
+                )
 
-            end
+                    getgenv().Team =
+                        "Marines"
+
+                end
         },
 
+
         {
-            Name = "Pirates",
 
-            Callback = function()
+            Name =
+                "Pirates",
 
-                getgenv().Team = "Pirates"
+            Callback =
+                function(
+                    Name,
+                    Selected
+                )
 
-            end
+                    getgenv().Team =
+                        "Pirates"
+
+                end
         }
     },
 
-    ChildClick = "Lever",
 
-    ChildName = "Auto Select Team",
+    ChildClick =
+        "Lever",
 
-    ChildSave = true,
 
-    ChildDefault = false,
+    ChildName =
+        "Auto Team",
 
-    ChildCallback = function(enabled, selected)
 
-        if enabled then
+    ChildSave =
+        true,
 
-            if selected[1] == "Marines" then
 
-                getgenv().Team = "Marines"
+    ChildDefault =
+        false,
 
-            elseif selected[1] == "Pirates" then
 
-                getgenv().Team = "Pirates"
+    ChildCallback =
+        function(
+            Enabled,
+            Selected
+        )
+
+
+            if Enabled then
+
+
+                if Selected[1]
+                    == "Marines" then
+
+
+                    getgenv().Team =
+                        "Marines"
+
+
+                elseif Selected[1]
+                    == "Pirates" then
+
+
+                    getgenv().Team =
+                        "Pirates"
+
+
+                end
 
             end
 
         end
-
-    end
 })
