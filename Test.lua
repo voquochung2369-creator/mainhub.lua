@@ -5,7 +5,7 @@ until game:IsLoaded()
 task.wait(5)
 
 local Hub = _G.CustomHub
-wait = (2)
+
 if not Hub then
     warn("CustomHub Main.lua chưa được load")
     return
