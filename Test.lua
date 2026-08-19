@@ -26,25 +26,13 @@ end
 
 Test:AddButton({
 
-    Name =
-        "Team",
-
-    Click =
-        "Scroll",
-
-    Slot =
-        1,
+    Name = "Team",
+    Click = "Scroll",
+    Slot = 1,
     Default = false,
-    Min =
-        0,
-
-    Max =
-        1,
-
-    Save =
-        true,
-
-
+    Min = 0,
+    Max = 1,
+    Save = true,
     Options = {
 
         {
