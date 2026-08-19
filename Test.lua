@@ -1,9 +1,3 @@
-repeat
-    task.wait()
-until game:IsLoaded()
-
-task.wait(5)
-
 local Hub = _G.CustomHub
 
 if not Hub then
@@ -119,7 +113,8 @@ Test:AddButton({
 
         if Enabled then
 
-
+              task.wait(3)
+                
             if Selected[1] == "Marines" then
 
 
@@ -137,7 +132,8 @@ Test:AddButton({
 
             elseif Selected[1] == "Pirates" then
 
-
+                task.wait(3)
+                    
                 getgenv().Team =
                     "Pirates"
 
