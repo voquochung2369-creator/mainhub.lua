@@ -1,7 +1,3 @@
---------------------------------------------------
--- CUSTOM HUB - HOTBAR.LUA
---------------------------------------------------
-
 local Hub = _G.CustomHub
 
 if not Hub or not Hub.Window then
@@ -10,10 +6,6 @@ if not Hub or not Hub.Window then
 end
 
 local Window = Hub.Window
-
---------------------------------------------------
--- TAB + LINK
---------------------------------------------------
 
 local Tabs = {
     {
@@ -27,12 +19,6 @@ local Tabs = {
         Slot = 2,
         Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/ESP.lua"
     },
-	
---    {
---        Name = "Test",
---        Slot = 3,
- --       Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Test.lua"
---    },
 
     {
         Name = "Setting",
@@ -40,10 +26,6 @@ local Tabs = {
         Link = "https://raw.githubusercontent.com/voquochung2369-creator/mainhub.lua/refs/heads/main/Setting.lua"
     }
 }
-
---------------------------------------------------
--- CREATE + LOAD
---------------------------------------------------
 
 for _, Data in ipairs(Tabs) do
 
@@ -56,13 +38,19 @@ for _, Data in ipairs(Tabs) do
 
     local Success, Error = pcall(function()
 
-        local Script = loadstring(
-            game:HttpGet(Data.Link)
-        )
+        local Source = game:HttpGet(Data.Link)
 
-        if Script then
-            Script(Tab)
+        local Script, CompileError = loadstring(Source)
+
+        if not Script then
+            error(
+                Data.Name
+                .. ".lua compile error: "
+                .. tostring(CompileError)
+            )
         end
+
+        Script(Tab)
 
     end)
 
