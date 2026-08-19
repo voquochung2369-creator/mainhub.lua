@@ -211,7 +211,7 @@ Bloxfruit:AddButton({
 Bloxfruit:AddButton({
     Name = "Auto Join Team",
     Click = "Scroll",
-    Slot = 1,
+    Slot = 4,
     Min = 0,
     Max = 1,
     Save = true,
