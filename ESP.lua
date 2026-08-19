@@ -42,11 +42,7 @@ ESP:AddButton({
     Max = 1,
 
     Save = true,
-
-    Classic = {
-        "Player"
-    },
-
+        
     Options = {
 
         {
@@ -74,7 +70,7 @@ ESP:AddButton({
             Name = "NPC",
 
             Callback = function()
-                print("NPC ESP Selected")
+                    
             end
         },
 
@@ -82,7 +78,7 @@ ESP:AddButton({
             Name = "Chest",
 
             Callback = function()
-                print("Chest ESP Selected")
+                    
             end
         },
 
@@ -90,7 +86,6 @@ ESP:AddButton({
             Name = "Fruit",
 
             Callback = function()
-                print("Fruit ESP Selected")
             end
         }
 
@@ -98,11 +93,11 @@ ESP:AddButton({
 
     ChildClick = "Lever",
 
-    ChildName = "Auto Execute",
+    ChildName = "Click to Use ESP",
 
     ChildDefault = false,
 
-    ChildSave = true,
+    ChildSave = false,
 
     ChildCallback = function(Value, Selected)
 
@@ -130,7 +125,7 @@ ESP:AddButton({
 
             end
 
-            print("Auto Execute ON")
+                
 
         else
 
@@ -138,7 +133,6 @@ ESP:AddButton({
                 _G.CustomHubESP.Toggle(false)
             end
 
-            print("Auto Execute OFF")
 
         end
 
