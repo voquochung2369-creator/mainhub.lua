@@ -87,22 +87,10 @@ Test:AddButton({
     },
 
 
-    ChildClick =
-        "Lever",
-
-
-    ChildName =
-        "Auto Team",
-
-
-    ChildSave =
-        true,
-
-
-    ChildDefault =
-        false,
-
-
+    ChildClick = "Lever",
+    ChildName = "Auto Team",
+    ChildSave = true,
+    ChildDefault = false,
     ChildCallback =
         function(
             Enabled,
