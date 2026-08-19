@@ -30,19 +30,12 @@ end
 --------------------------------------------------
 
 ESP:AddButton({
-
     Name = "ESP LIST",
-
     Click = "Scroll",
-
     Slot = 1,
-
     Min = 0,
-
     Max = 4,
-
     Save = true,
-
     Classic = {
         "Player"
     },
@@ -65,10 +58,6 @@ ESP:AddButton({
                     if fn then
                         fn()
                     end
-                end
-
-                print("Player ESP Loaded")
-
             end
         },
 
@@ -76,7 +65,6 @@ ESP:AddButton({
             Name = "NPC",
 
             Callback = function()
-                print("NPC ESP Selected")
             end
         },
 
@@ -84,7 +72,6 @@ ESP:AddButton({
             Name = "Chest",
 
             Callback = function()
-                print("Chest ESP Selected")
             end
         },
 
@@ -92,7 +79,6 @@ ESP:AddButton({
             Name = "Fruit",
 
             Callback = function()
-                print("Fruit ESP Selected")
             end
         }
     },
@@ -130,18 +116,11 @@ ESP:AddButton({
                         _G.CustomHubESP.Toggle(true)
                     end
                 end
-            end
-
-            print("Auto Execute ON")
-
         else
 
             if _G.CustomHubESP then
                 _G.CustomHubESP.Toggle(false)
             end
-
-            print("Auto Execute OFF")
-
         end
     end
 })
