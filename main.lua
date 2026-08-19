@@ -2312,1146 +2312,878 @@ local function SelectTab(tab)
 
             UpdateLever()
 
+    --------------------------------------------------
+    -- SCROLL
+    --------------------------------------------------
+
+    elseif data.Click == "Scroll" then
+
+        local expanded =
+            data.Expanded == true
+
         --------------------------------------------------
-        -- SCROLL
+        -- ROOT
         --------------------------------------------------
 
-        elseif data.Click == "Scroll" then
+        local root =
+            Instance.new("Frame")
 
-            local expanded =
-                data.Expanded == true
+        root.Name =
+            data.Name
 
-            local root =
-                Instance.new(
-                    "Frame"
-                )
+        root.Parent =
+            MainContent
 
-            root.Name =
-                data.Name
+        root.LayoutOrder =
+            data.Slot
 
-            root.Parent =
-                MainContent
+        root.BackgroundTransparency =
+            1
 
-            root.LayoutOrder =
-                data.Slot
+        root.BorderSizePixel =
+            0
 
-            root.BackgroundTransparency =
-                1
+        -- QUAN TRỌNG:
+        -- Không để root cắt ChildClick
+        root.ClipsDescendants =
+            false
 
-            root.BorderSizePixel =
-                0
+        --------------------------------------------------
+        -- SIZE CONFIG
+        --------------------------------------------------
 
-            root.ClipsDescendants =
-                true
+        local HEADER_HEIGHT = 45
+        local SCROLL_HEIGHT = 150
+        local CHILD_HEIGHT = 32
+        local GAP = 5
 
-            local function GetExpandedHeight()
+        --------------------------------------------------
+        -- HEIGHT
+        --------------------------------------------------
 
-                local height =
-                    45 + 150 + 10
+        local function GetRootHeight()
+
+            local height =
+                HEADER_HEIGHT
+
+            if data.Expanded then
+
+                height =
+                    height
+                    + GAP
+                    + SCROLL_HEIGHT
 
                 if data.ChildClick
                     == "Button"
-
                     or data.ChildClick
                     == "Lever" then
 
                     height =
-    height + 35
+                        height
+                        + GAP
+                        + CHILD_HEIGHT
                 end
-
-                return height
             end
 
-            if expanded then
+            return height
+        end
 
-                root.Size =
-                    UDim2.new(
-                        1,
-                        0,
-                        0,
-                        GetExpandedHeight()
+        root.Size =
+            UDim2.new(
+                1,
+                0,
+                0,
+                GetRootHeight()
+            )
+
+        --------------------------------------------------
+        -- HEADER
+        --------------------------------------------------
+
+        local header =
+            Instance.new("TextButton")
+
+        header.Parent =
+            root
+
+        header.Size =
+            UDim2.new(
+                1,
+                0,
+                0,
+                HEADER_HEIGHT
+            )
+
+        header.Position =
+            UDim2.new(
+                0,
+                0,
+                0,
+                0
+            )
+
+        header.BackgroundColor3 =
+            Color3.fromRGB(
+                90,
+                90,
+                90
+            )
+
+        header.BackgroundTransparency =
+            0.05
+
+        header.BorderSizePixel =
+            0
+
+        header.Text =
+            "   "
+            .. data.Name
+
+        header.TextColor3 =
+            Color3.fromRGB(
+                255,
+                255,
+                255
+            )
+
+        header.TextStrokeTransparency =
+            1
+
+        header.TextSize =
+            16
+
+        header.Font =
+            Enum.Font.GothamBold
+
+        header.TextXAlignment =
+            Enum.TextXAlignment.Left
+
+        local headerCorner =
+            Instance.new("UICorner")
+
+        headerCorner.CornerRadius =
+            UDim.new(
+                0,
+                8
+            )
+
+        headerCorner.Parent =
+            header
+
+        local headerStroke =
+            Instance.new("UIStroke")
+
+        headerStroke.Color =
+            Color3.fromRGB(
+                120,
+                120,
+                120
+            )
+
+        headerStroke.Thickness =
+            1
+
+        headerStroke.Transparency =
+            0.25
+
+        headerStroke.Parent =
+            header
+
+        --------------------------------------------------
+        -- COUNT
+        --------------------------------------------------
+
+        local countLabel =
+            Instance.new("TextLabel")
+
+        countLabel.Parent =
+            header
+
+        countLabel.Size =
+            UDim2.new(
+                0,
+                90,
+                1,
+                0
+            )
+
+        countLabel.Position =
+            UDim2.new(
+                1,
+                -125,
+                0,
+                0
+            )
+
+        countLabel.BackgroundTransparency =
+            1
+
+        countLabel.TextColor3 =
+            Color3.fromRGB(
+                230,
+                230,
+                230
+            )
+
+        countLabel.TextStrokeTransparency =
+            1
+
+        countLabel.TextSize =
+            12
+
+        countLabel.Font =
+            Enum.Font.GothamBold
+
+        countLabel.TextXAlignment =
+            Enum.TextXAlignment.Center
+
+        --------------------------------------------------
+        -- ARROW
+        --------------------------------------------------
+
+        local arrow =
+            Instance.new("TextLabel")
+
+        arrow.Parent =
+            header
+
+        arrow.Size =
+            UDim2.new(
+                0,
+                30,
+                1,
+                0
+            )
+
+        arrow.Position =
+            UDim2.new(
+                1,
+                -35,
+                0,
+                0
+            )
+
+        arrow.BackgroundTransparency =
+            1
+
+        arrow.TextColor3 =
+            Color3.fromRGB(
+                255,
+                255,
+                255
+            )
+
+        arrow.TextStrokeTransparency =
+            1
+
+        arrow.TextSize =
+            18
+
+        arrow.Font =
+            Enum.Font.GothamBold
+
+        arrow.TextXAlignment =
+            Enum.TextXAlignment.Center
+
+        --------------------------------------------------
+        -- INNER SCROLL
+        --------------------------------------------------
+
+        local scrollFrame =
+            Instance.new("ScrollingFrame")
+
+        scrollFrame.Name =
+            "ScrollFrame"
+
+        scrollFrame.Parent =
+            root
+
+        scrollFrame.Size =
+            UDim2.new(
+                1,
+                0,
+                0,
+                SCROLL_HEIGHT
+            )
+
+        scrollFrame.Position =
+            UDim2.new(
+                0,
+                0,
+                0,
+                HEADER_HEIGHT + GAP
+            )
+
+        scrollFrame.BackgroundColor3 =
+            Color3.fromRGB(
+                75,
+                75,
+                75
+            )
+
+        scrollFrame.BorderSizePixel =
+            0
+
+        scrollFrame.ScrollBarThickness =
+            4
+
+        scrollFrame.ScrollingEnabled =
+            true
+
+        scrollFrame.Visible =
+            expanded
+
+        scrollFrame.CanvasSize =
+            UDim2.new(
+                0,
+                0,
+                0,
+                0
+            )
+
+        local scrollCorner =
+            Instance.new("UICorner")
+
+        scrollCorner.CornerRadius =
+            UDim.new(
+                0,
+                8
+            )
+
+        scrollCorner.Parent =
+            scrollFrame
+
+        local scrollStroke =
+            Instance.new("UIStroke")
+
+        scrollStroke.Color =
+            Color3.fromRGB(
+                120,
+                120,
+                120
+            )
+
+        scrollStroke.Thickness =
+            1
+
+        scrollStroke.Parent =
+            scrollFrame
+
+        --------------------------------------------------
+        -- OPTION LAYOUT
+        --------------------------------------------------
+
+        local optionLayout =
+            Instance.new("UIListLayout")
+
+        optionLayout.Parent =
+            scrollFrame
+
+        optionLayout.Padding =
+            UDim.new(
+                0,
+                5
+            )
+
+        optionLayout.SortOrder =
+            Enum.SortOrder.LayoutOrder
+
+        --------------------------------------------------
+        -- COUNT UPDATE
+        --------------------------------------------------
+
+        local function UpdateCount()
+
+            if data.Max then
+
+                countLabel.Text =
+                    tostring(
+                        #data.Selected
+                    )
+                    .. "/"
+                    .. tostring(
+                        data.Max
                     )
 
             else
 
-                root.Size =
+                countLabel.Text =
+                    tostring(
+                        #data.Selected
+                    )
+                    .. " selected"
+            end
+        end
+
+        --------------------------------------------------
+        -- SAVE
+        --------------------------------------------------
+
+        local function SaveScroll()
+
+            if data.Save then
+
+                SetSavedValue(
+                    data.SaveKey,
+                    data.Selected
+                )
+            end
+        end
+
+        --------------------------------------------------
+        -- OPTIONS
+        --------------------------------------------------
+
+        for index, optionData
+            in ipairs(
+                data.Options
+            ) do
+
+            if type(optionData)
+                == "string" then
+
+                optionData = {
+                    Name = optionData
+                }
+            end
+
+            if type(optionData)
+                == "table" then
+
+                local optionName =
+                    tostring(
+                        optionData.Name
+                        or (
+                            "Option "
+                            .. index
+                        )
+                    )
+
+                local option =
+                    Instance.new(
+                        "TextButton"
+                    )
+
+                option.Parent =
+                    scrollFrame
+
+                option.Name =
+                    optionName
+
+                option.LayoutOrder =
+                    index
+
+                option.Size =
                     UDim2.new(
                         1,
+                        -8,
                         0,
-                        0,
-                        45
-                    )
-            end
-
-            --------------------------------------------------
-            -- HEADER
-            --------------------------------------------------
-
-            local header =
-                Instance.new(
-                    "TextButton"
-                )
-
-            header.Parent =
-                root
-
-            header.Size =
-                UDim2.new(
-                    1,
-                    0,
-                    0,
-                    45
-                )
-
-            header.Position =
-                UDim2.new(
-                    0,
-                    0,
-                    0,
-                    0
-                )
-
-            header.BackgroundColor3 =
-                Color3.fromRGB(
-                    90,
-                    90,
-                    90
-                )
-
-            header.BackgroundTransparency =
-                0.05
-
-            header.BorderSizePixel =
-                0
-
-            header.Text =
-                "   "
-                .. data.Name
-
-            header.TextColor3 =
-                Color3.fromRGB(
-                    255,
-                    255,
-                    255
-                )
-
-            header.TextStrokeTransparency =
-                1
-
-            header.TextSize =
-                16
-
-            header.Font =
-                Enum.Font.GothamBold
-
-            header.TextXAlignment =
-                Enum.TextXAlignment.Left
-
-            local headerCorner =
-                Instance.new(
-                    "UICorner"
-                )
-
-            headerCorner.CornerRadius =
-                UDim.new(
-                    0,
-                    8
-                )
-
-            headerCorner.Parent =
-                header
-
-            local headerStroke =
-                Instance.new(
-                    "UIStroke"
-                )
-
-            headerStroke.Color =
-                Color3.fromRGB(
-                    120,
-                    120,
-                    120
-                )
-
-            headerStroke.Thickness =
-                1
-
-            headerStroke.Transparency =
-                0.25
-
-            headerStroke.Parent =
-                header
-
-            --------------------------------------------------
-            -- COUNT
-            --------------------------------------------------
-
-            local countLabel =
-                Instance.new(
-                    "TextLabel"
-                )
-
-            countLabel.Parent =
-                header
-
-            countLabel.Size =
-                UDim2.new(
-                    0,
-                    90,
-                    1,
-                    0
-                )
-
-            countLabel.Position =
-                UDim2.new(
-                    1,
-                    -125,
-                    0,
-                    0
-                )
-
-            countLabel.BackgroundTransparency =
-                1
-
-            countLabel.TextColor3 =
-                Color3.fromRGB(
-                    230,
-                    230,
-                    230
-                )
-
-            countLabel.TextStrokeTransparency =
-                1
-
-            countLabel.TextSize =
-                12
-
-            countLabel.Font =
-                Enum.Font.GothamBold
-
-            countLabel.TextXAlignment =
-                Enum.TextXAlignment.Center
-
-            --------------------------------------------------
-            -- ARROW
-            --------------------------------------------------
-
-            local arrow =
-                Instance.new(
-                    "TextLabel"
-                )
-
-            arrow.Parent =
-                header
-
-            arrow.Size =
-                UDim2.new(
-                    0,
-                    30,
-                    1,
-                    0
-                )
-
-            arrow.Position =
-                UDim2.new(
-                    1,
-                    -35,
-                    0,
-                    0
-                )
-
-            arrow.BackgroundTransparency =
-                1
-
-            arrow.TextColor3 =
-                Color3.fromRGB(
-                    255,
-                    255,
-                    255
-                )
-
-            arrow.TextStrokeTransparency =
-                1
-
-            arrow.TextSize =
-                18
-
-            arrow.Font =
-                Enum.Font.GothamBold
-
-            arrow.TextXAlignment =
-                Enum.TextXAlignment.Center
-
-            --------------------------------------------------
-            -- INNER SCROLL
-            --------------------------------------------------
-
-            local scrollFrame =
-                Instance.new(
-                    "ScrollingFrame"
-                )
-
-            scrollFrame.Parent =
-                root
-
-            scrollFrame.Size =
-                UDim2.new(
-                    1,
-                    0,
-                    0,
-                    150
-                )
-
-            scrollFrame.Position =
-                UDim2.new(
-                    0,
-                    0,
-                    0,
-                    50
-                )
-
-            scrollFrame.BackgroundColor3 =
-                Color3.fromRGB(
-                    75,
-                    75,
-                    75
-                )
-
-            scrollFrame.BorderSizePixel =
-                0
-
-            scrollFrame.ScrollBarThickness =
-                4
-
-            scrollFrame.ScrollingEnabled =
-                true
-
-            scrollFrame.Visible =
-                expanded
-
-            scrollFrame.CanvasSize =
-                UDim2.new(
-                    0,
-                    0,
-                    0,
-                    0
-                )
-
-            local scrollCorner =
-                Instance.new(
-                    "UICorner"
-                )
-
-            scrollCorner.CornerRadius =
-                UDim.new(
-                    0,
-                    8
-                )
-
-            scrollCorner.Parent =
-                scrollFrame
-
-            local scrollStroke =
-                Instance.new(
-                    "UIStroke"
-                )
-
-            scrollStroke.Color =
-                Color3.fromRGB(
-                    120,
-                    120,
-                    120
-                )
-
-            scrollStroke.Thickness =
-                1
-
-            scrollStroke.Parent =
-                scrollFrame
-
-            local optionLayout =
-                Instance.new(
-                    "UIListLayout"
-                )
-
-            optionLayout.Parent =
-                scrollFrame
-
-            optionLayout.Padding =
-                UDim.new(
-                    0,
-                    5
-                )
-
-            optionLayout.SortOrder =
-                Enum.SortOrder.LayoutOrder
-
-            --------------------------------------------------
-            -- COUNT
-            --------------------------------------------------
-
-            local function UpdateCount()
-
-                if data.Max then
-
-                    countLabel.Text =
-                        tostring(
-                            #data.Selected
-                        )
-                        .. "/"
-                        .. tostring(
-                            data.Max
-                        )
-
-                else
-
-                    countLabel.Text =
-                        tostring(
-                            #data.Selected
-                        )
-                        .. " selected"
-                end
-            end
-
-            --------------------------------------------------
-            -- SAVE
-            --------------------------------------------------
-
-            local function SaveScroll()
-
-                if data.Save then
-
-                    SetSavedValue(
-                        data.SaveKey,
-                        data.Selected
-                    )
-                end
-            end
-
-            --------------------------------------------------
-            -- OPTIONS
-            --------------------------------------------------
-
-            for index, optionData
-                in ipairs(
-                    data.Options
-                ) do
-
-                if type(optionData)
-                    == "string" then
-
-                    optionData = {
-                        Name =
-                            optionData
-                    }
-                end
-
-                if type(optionData)
-                    == "table" then
-
-                    local optionName =
-                        tostring(
-                            optionData.Name
-                            or (
-                                "Option "
-                                .. index
-                            )
-                        )
-
-                    local option =
-                        Instance.new(
-                            "TextButton"
-                        )
-
-                    option.Parent =
-                        scrollFrame
-
-                    option.Name =
-                        optionName
-
-                    option.LayoutOrder =
-                        index
-
-                    option.Size =
-                        UDim2.new(
-                            1,
-                            -8,
-                            0,
-                            38
-                        )
-
-                    option.BackgroundColor3 =
-                        Color3.fromRGB(
-                            85,
-                            85,
-                            85
-                        )
-
-                    option.BorderSizePixel =
-                        0
-
-                    option.Text =
-                        "   "
-                        .. optionName
-
-                    option.TextColor3 =
-                        Color3.fromRGB(
-                            255,
-                            255,
-                            255
-                        )
-
-                    option.TextStrokeTransparency =
-                        1
-
-                    option.TextSize =
-                        14
-
-                    option.Font =
-                        Enum.Font.GothamBold
-
-                    option.TextXAlignment =
-                        Enum.TextXAlignment.Left
-
-                    local optionCorner =
-                        Instance.new(
-                            "UICorner"
-                        )
-
-                    optionCorner.CornerRadius =
-                        UDim.new(
-                            0,
-                            7
-                        )
-
-                    optionCorner.Parent =
-                        option
-
-                    local selectedMark =
-                        Instance.new(
-                            "TextLabel"
-                        )
-
-                    selectedMark.Parent =
-                        option
-
-                    selectedMark.Size =
-                        UDim2.new(
-                            0,
-                            35,
-                            1,
-                            0
-                        )
-
-                    selectedMark.Position =
-                        UDim2.new(
-                            1,
-                            -40,
-                            0,
-                            0
-                        )
-
-                    selectedMark.BackgroundTransparency =
-                        1
-
-                    selectedMark.TextColor3 =
-                        Color3.fromRGB(
-                            255,
-                            255,
-                            255
-                        )
-
-                    selectedMark.TextStrokeTransparency =
-                        1
-
-                    selectedMark.TextSize =
-                        18
-
-                    selectedMark.Font =
-                        Enum.Font.GothamBold
-
-                    selectedMark.TextXAlignment =
-                        Enum.TextXAlignment.Center
-
-                    local function UpdateOption()
-
-                        if IsNameSelected(
-                            data.Selected,
-                            optionName
-                        ) then
-
-                            option.BackgroundColor3 =
-                                Color3.fromRGB(
-                                    0,
-                                    120,
-                                    0
-                                )
-
-                            selectedMark.Text =
-                                "✓"
-
-                        else
-
-                            option.BackgroundColor3 =
-                                Color3.fromRGB(
-                                    85,
-                                    85,
-                                    85
-                                )
-
-                            selectedMark.Text =
-                                ""
-                        end
-                    end
-
-                    option.MouseButton1Click:Connect(
-                        function()
-
-                            local selected =
-                                IsNameSelected(
-                                    data.Selected,
-                                    optionName
-                                )
-
-                            if selected then
-
-                                if data.Min
-                                    and #data.Selected
-                                        <= data.Min then
-
-                                    return
-                                end
-
-                                RemoveSelectedName(
-                                    data.Selected,
-                                    optionName
-                                )
-
-                            else
-
-                                if data.Max
-                                    and #data.Selected
-                                        >= data.Max then
-
-                                    return
-                                end
-
-                                table.insert(
-                                    data.Selected,
-                                    optionName
-                                )
-                            end
-
-                            UpdateOption()
-                            UpdateCount()
-                            SaveScroll()
-                        end
+                        38
                     )
 
-                    UpdateOption()
-                end
-            end
-
-            --------------------------------------------------
-            -- INNER SCROLL UPDATE
-            --------------------------------------------------
-
-            local function UpdateInnerScroll()
-
-                local contentHeight =
-                    optionLayout.AbsoluteContentSize.Y
-
-                local viewportHeight =
-                    scrollFrame.AbsoluteSize.Y
-
-                local needsScroll =
-                    contentHeight
-                    > viewportHeight + 1
-
-                scrollFrame.ScrollingEnabled =
-                    needsScroll
-
-                if needsScroll then
-
-                    scrollFrame.ScrollBarThickness =
-                        4
-
-                    scrollFrame.CanvasSize =
-                        UDim2.new(
-                            0,
-                            0,
-                            0,
-                            contentHeight + 10
-                        )
-
-                else
-
-                    scrollFrame.ScrollBarThickness =
-                        0
-
-                    scrollFrame.CanvasSize =
-                        UDim2.new(
-                            0,
-                            0,
-                            0,
-                            viewportHeight
-                        )
-
-                    scrollFrame.CanvasPosition =
-                        Vector2.new(
-                            0,
-                            0
-                        )
-                end
-            end
-
-            optionLayout:GetPropertyChangedSignal(
-                "AbsoluteContentSize"
-            ):Connect(
-                UpdateInnerScroll
-            )
-
-            scrollFrame:GetPropertyChangedSignal(
-                "AbsoluteSize"
-            ):Connect(
-                UpdateInnerScroll
-            )
-
-            UpdateInnerScroll()
-
-            --------------------------------------------------
-            -- CHILD CONTROL
-            --------------------------------------------------
-
-            local childControl =
-                nil
-
-            if data.ChildClick
-                == "Button" then
-
-                childControl =
-                    Instance.new(
-                        "TextButton"
-                    )
-
-                childControl.Parent =
-                    root
-
-                childControl.Size =
-    UDim2.new(
-        0,
-        100,
-        0,
-        32
-    )
-
-                childControl.Position =
-    UDim2.new(
-        1,
-        -100,
-        0,
-        210
-    )
-
-                childControl.BackgroundColor3 =
+                option.BackgroundColor3 =
                     Color3.fromRGB(
-                        100,
-                        100,
-                        100
+                        85,
+                        85,
+                        85
                     )
 
-                childControl.BorderSizePixel =
+                option.BorderSizePixel =
                     0
 
-                childControl.Text =
-                    data.ChildName
-                    or "Execute Selected"
-
-                childControl.TextColor3 =
-                    Color3.fromRGB(
-                        255,
-                        255,
-                        255
-                    )
-
-                childControl.TextStrokeTransparency =
-                    1
-
-                childControl.TextSize =
-                    14
-
-                childControl.Font =
-                    Enum.Font.GothamBold
-
-                childControl.Visible =
-                    expanded
-
-                local childCorner =
-                    Instance.new(
-                        "UICorner"
-                    )
-
-                childCorner.CornerRadius =
-                    UDim.new(
-                        0,
-                        8
-                    )
-
-                childCorner.Parent =
-                    childControl
-
-                local childStroke =
-                    Instance.new(
-                        "UIStroke"
-                    )
-
-                childStroke.Color =
-                    Color3.fromRGB(
-                        120,
-                        120,
-                        120
-                    )
-
-                childStroke.Thickness =
-                    1
-
-                childStroke.Parent =
-                    childControl
-
-                childControl.MouseButton1Click:Connect(
-                    function()
-
-                        if data.Min
-                            and #data.Selected
-                                < data.Min then
-
-                            return
-                        end
-
-                        if typeof(
-                            data.Callback
-                        ) == "function" then
-
-                            task.spawn(
-                                function()
-
-                                    pcall(
-                                        function()
-
-                                            data.Callback(
-                                                data.Selected
-                                            )
-
-                                        end
-                                    )
-                                end
-                            )
-                        end
-
-                        for _, selectedName
-                            in ipairs(
-                                data.Selected
-                            ) do
-
-                            local option =
-                                FindOption(
-                                    data.Options,
-                                    selectedName
-                                )
-
-                            if option
-                                and typeof(
-                                    option.Callback
-                                ) == "function" then
-
-                                task.spawn(
-                                    function()
-
-                                        pcall(
-                                            function()
-
-                                                option.Callback(
-                                                    selectedName,
-                                                    data.Selected
-                                                )
-
-                                            end
-                                        )
-                                    end
-                                )
-                            end
-                        end
-                    end
-                )
-
-            elseif data.ChildClick
-                == "Lever" then
-
-                childControl =
-                    Instance.new(
-                        "TextButton"
-                    )
-
-                childControl.Parent =
-                    root
-
-                childControl.Size =
-    UDim2.new(
-        0,
-        100,
-        0,
-        32
-    )
-
-                childControl.Position =
-    UDim2.new(
-        1,
-        -100,
-        0,
-        210
-    )
-
-                childControl.BackgroundColor3 =
-                    Color3.fromRGB(
-                        100,
-                        100,
-                        100
-                    )
-
-                childControl.BorderSizePixel =
-                    0
-
-                childControl.Text =
+                option.Text =
                     "   "
-                    .. (
-                        data.ChildName
-                        or "Auto Execute"
-                    )
+                    .. optionName
 
-                childControl.TextColor3 =
+                option.TextColor3 =
                     Color3.fromRGB(
                         255,
                         255,
                         255
                     )
 
-                childControl.TextStrokeTransparency =
+                option.TextStrokeTransparency =
                     1
 
-                childControl.TextSize =
+                option.TextSize =
                     14
 
-                childControl.Font =
+                option.Font =
                     Enum.Font.GothamBold
 
-                childControl.TextXAlignment =
+                option.TextXAlignment =
                     Enum.TextXAlignment.Left
 
-                childControl.Visible =
-                    expanded
+                local optionCorner =
+                    Instance.new("UICorner")
 
-                local childCorner =
-                    Instance.new(
-                        "UICorner"
-                    )
-
-                childCorner.CornerRadius =
+                optionCorner.CornerRadius =
                     UDim.new(
                         0,
-                        8
+                        7
                     )
 
-                childCorner.Parent =
-                    childControl
+                optionCorner.Parent =
+                    option
 
-                local childLever =
-                    Instance.new(
-                        "Frame"
-                    )
-
-                childLever.Parent =
-                    childControl
-
-                childLever.Size =
-                    UDim2.new(
-                        0,
-                        65,
-                        0,
-                        28
-                    )
-
-                childLever.Position =
-                    UDim2.new(
-                        1,
-                        -75,
-                        0.5,
-                        -14
-                    )
-
-                childLever.BorderSizePixel =
-                    0
-
-                local childLeverCorner =
-                    Instance.new(
-                        "UICorner"
-                    )
-
-                childLeverCorner.CornerRadius =
-                    UDim.new(
-                        1,
-                        0
-                    )
-
-                childLeverCorner.Parent =
-                    childLever
-
-                local childLeverText =
+                local selectedMark =
                     Instance.new(
                         "TextLabel"
                     )
 
-                childLeverText.Parent =
-                    childLever
+                selectedMark.Parent =
+                    option
 
-                childLeverText.Size =
+                selectedMark.Size =
                     UDim2.new(
-                        1,
                         0,
+                        35,
                         1,
                         0
                     )
 
-                childLeverText.BackgroundTransparency =
+                selectedMark.Position =
+                    UDim2.new(
+                        1,
+                        -40,
+                        0,
+                        0
+                    )
+
+                selectedMark.BackgroundTransparency =
                     1
 
-                childLeverText.TextSize =
-                    12
+                selectedMark.TextColor3 =
+                    Color3.fromRGB(
+                        255,
+                        255,
+                        255
+                    )
 
-                childLeverText.Font =
+                selectedMark.TextStrokeTransparency =
+                    1
+
+                selectedMark.TextSize =
+                    18
+
+                selectedMark.Font =
                     Enum.Font.GothamBold
 
-                childLeverText.TextColor3 =
-                    Color3.fromRGB(
-                        255,
-                        255,
-                        255
-                    )
-
-                childLeverText.TextXAlignment =
+                selectedMark.TextXAlignment =
                     Enum.TextXAlignment.Center
 
-                local childCircle =
-                    Instance.new(
-                        "Frame"
-                    )
+                local function UpdateOption()
 
-                childCircle.Parent =
-                    childLever
+                    if IsNameSelected(
+                        data.Selected,
+                        optionName
+                    ) then
 
-                childCircle.Size =
-                    UDim2.new(
-                        0,
-                        22,
-                        0,
-                        22
-                    )
-
-                childCircle.BorderSizePixel =
-                    0
-
-                childCircle.BackgroundColor3 =
-                    Color3.fromRGB(
-                        255,
-                        255,
-                        255
-                    )
-
-                local childCircleCorner =
-                    Instance.new(
-                        "UICorner"
-                    )
-
-                childCircleCorner.CornerRadius =
-                    UDim.new(
-                        1,
-                        0
-                    )
-
-                childCircleCorner.Parent =
-                    childCircle
-
-                local function UpdateChildLever()
-
-                    if data.ChildEnabled then
-
-                        childLever.BackgroundColor3 =
+                        option.BackgroundColor3 =
                             Color3.fromRGB(
                                 0,
-                                150,
+                                120,
                                 0
                             )
 
-                        childLeverText.Text =
-                            "ON"
-
-                        childCircle.Position =
-                            UDim2.new(
-                                1,
-                                -25,
-                                0.5,
-                                -11
-                            )
+                        selectedMark.Text =
+                            "✓"
 
                     else
 
-                        childLever.BackgroundColor3 =
+                        option.BackgroundColor3 =
                             Color3.fromRGB(
-                                70,
-                                70,
-                                70
+                                85,
+                                85,
+                                85
                             )
 
-                        childLeverText.Text =
-                            "OFF"
-
-                        childCircle.Position =
-                            UDim2.new(
-                                0,
-                                3,
-                                0.5,
-                                -11
-                            )
+                        selectedMark.Text =
+                            ""
                     end
                 end
 
-                UpdateChildLever()
-
-                childControl.MouseButton1Click:Connect(
+                option.MouseButton1Click:Connect(
                     function()
 
-                        if data.Min
-                            and #data.Selected
-                                < data.Min then
+                        local selected =
+                            IsNameSelected(
+                                data.Selected,
+                                optionName
+                            )
 
-                            return
-                        end
+                        if selected then
 
-                        data.ChildEnabled =
-                            not data.ChildEnabled
+                            if data.Min
+                                and #data.Selected
+                                    <= data.Min then
 
-                        if data.ChildSave then
+                                return
+                            end
 
-                            SetSavedValue(
-                                data.ChildSaveKey,
-                                data.ChildEnabled
+                            RemoveSelectedName(
+                                data.Selected,
+                                optionName
+                            )
+
+                        else
+
+                            if data.Max
+                                and #data.Selected
+                                    >= data.Max then
+
+                                return
+                            end
+
+                            table.insert(
+                                data.Selected,
+                                optionName
                             )
                         end
 
-                        UpdateChildLever()
+                        UpdateOption()
+                        UpdateCount()
+                        SaveScroll()
+                    end
+                )
 
-                        if typeof(
-                            data.ChildCallback
-                        ) == "function" then
+                UpdateOption()
+            end
+        end
+
+        --------------------------------------------------
+        -- INNER SCROLL UPDATE
+        --------------------------------------------------
+
+        local function UpdateInnerScroll()
+
+            local contentHeight =
+                optionLayout.AbsoluteContentSize.Y
+
+            local viewportHeight =
+                scrollFrame.AbsoluteSize.Y
+
+            local needsScroll =
+                contentHeight
+                > viewportHeight + 1
+
+            scrollFrame.ScrollingEnabled =
+                needsScroll
+
+            if needsScroll then
+
+                scrollFrame.ScrollBarThickness =
+                    4
+
+                scrollFrame.CanvasSize =
+                    UDim2.new(
+                        0,
+                        0,
+                        0,
+                        contentHeight + 10
+                    )
+
+            else
+
+                scrollFrame.ScrollBarThickness =
+                    0
+
+                scrollFrame.CanvasSize =
+                    UDim2.new(
+                        0,
+                        0,
+                        0,
+                        viewportHeight
+                    )
+
+                scrollFrame.CanvasPosition =
+                    Vector2.new(
+                        0,
+                        0
+                    )
+            end
+        end
+
+        optionLayout:GetPropertyChangedSignal(
+            "AbsoluteContentSize"
+        ):Connect(
+            UpdateInnerScroll
+        )
+
+        scrollFrame:GetPropertyChangedSignal(
+            "AbsoluteSize"
+        ):Connect(
+            UpdateInnerScroll
+        )
+
+        UpdateInnerScroll()
+
+        --------------------------------------------------
+        -- CHILD CONTROL
+        --
+        -- QUAN TRỌNG:
+        -- ChildClick nằm trong ROOT
+        -- nhưng KHÔNG nằm trong scrollFrame
+        --------------------------------------------------
+
+        local childControl = nil
+
+        local function UpdateChildPosition()
+
+            if not childControl then
+                return
+            end
+
+            childControl.Position =
+                UDim2.new(
+                    1,
+                    -100,
+                    0,
+                    HEADER_HEIGHT
+                    + GAP
+                    + SCROLL_HEIGHT
+                    + GAP
+                )
+        end
+
+        --------------------------------------------------
+        -- CHILD BUTTON
+        --------------------------------------------------
+
+        if data.ChildClick
+            == "Button" then
+
+            childControl =
+                Instance.new(
+                    "TextButton"
+                )
+
+            childControl.Name =
+                "ChildClick"
+
+            childControl.Parent =
+                root
+
+            childControl.Size =
+                UDim2.new(
+                    0,
+                    100,
+                    0,
+                    CHILD_HEIGHT
+                )
+
+            childControl.BackgroundColor3 =
+                Color3.fromRGB(
+                    100,
+                    100,
+                    100
+                )
+
+            childControl.BorderSizePixel =
+                0
+
+            childControl.Text =
+                data.ChildName
+                or "Execute Selected"
+
+            childControl.TextColor3 =
+                Color3.fromRGB(
+                    255,
+                    255,
+                    255
+                )
+
+            childControl.TextStrokeTransparency =
+                1
+
+            childControl.TextSize =
+                14
+
+            childControl.Font =
+                Enum.Font.GothamBold
+
+            childControl.Visible =
+                expanded
+
+            UpdateChildPosition()
+
+            local childCorner =
+                Instance.new(
+                    "UICorner"
+                )
+
+            childCorner.CornerRadius =
+                UDim.new(
+                    0,
+                    8
+                )
+
+            childCorner.Parent =
+                childControl
+
+            local childStroke =
+                Instance.new(
+                    "UIStroke"
+                )
+
+            childStroke.Color =
+                Color3.fromRGB(
+                    120,
+                    120,
+                    120
+                )
+
+            childStroke.Thickness =
+                1
+
+            childStroke.Parent =
+                childControl
+
+            childControl.MouseButton1Click:Connect(
+                function()
+
+                    if data.Min
+                        and #data.Selected
+                            < data.Min then
+
+                        return
+                    end
+
+                    if typeof(
+                        data.Callback
+                    ) == "function" then
+
+                        task.spawn(
+                            function()
+
+                                pcall(
+                                    function()
+
+                                        data.Callback(
+                                            data.Selected
+                                        )
+
+                                    end
+                                )
+                            end
+                        )
+                    end
+
+                    for _, selectedName
+                        in ipairs(
+                            data.Selected
+                        ) do
+
+                        local option =
+                            FindOption(
+                                data.Options,
+                                selectedName
+                            )
+
+                        if option
+                            and typeof(
+                                option.Callback
+                            ) == "function" then
 
                             task.spawn(
                                 function()
@@ -3459,8 +3191,8 @@ local function SelectTab(tab)
                                     pcall(
                                         function()
 
-                                            data.ChildCallback(
-                                                data.ChildEnabled,
+                                            option.Callback(
+                                                selectedName,
                                                 data.Selected
                                             )
 
@@ -3470,95 +3202,406 @@ local function SelectTab(tab)
                             )
                         end
                     end
+                end
+            )
+
+        --------------------------------------------------
+        -- CHILD LEVER
+        --------------------------------------------------
+
+        elseif data.ChildClick
+            == "Lever" then
+
+            childControl =
+                Instance.new(
+                    "TextButton"
                 )
 
-                if data.ChildEnabled
-                    and #data.Selected > 0
-                    and typeof(
-                        data.ChildCallback
-                    ) == "function" then
+            childControl.Name =
+                "ChildClick"
 
-                    task.spawn(
-                        function()
+            childControl.Parent =
+                root
 
-                            pcall(
-                                function()
+            childControl.Size =
+                UDim2.new(
+                    0,
+                    100,
+                    0,
+                    CHILD_HEIGHT
+                )
 
-                                    data.ChildCallback(
-                                        true,
-                                        data.Selected
-                                    )
-                                end
-                            )
-                        end
-                    )
+            childControl.BackgroundColor3 =
+                Color3.fromRGB(
+                    100,
+                    100,
+                    100
+                )
+
+            childControl.BorderSizePixel =
+                0
+
+            childControl.Text =
+                "   "
+                .. (
+                    data.ChildName
+                    or "Auto Execute"
+                )
+
+            childControl.TextColor3 =
+                Color3.fromRGB(
+                    255,
+                    255,
+                    255
+                )
+
+            childControl.TextStrokeTransparency =
+                1
+
+            childControl.TextSize =
+                14
+
+            childControl.Font =
+                Enum.Font.GothamBold
+
+            childControl.TextXAlignment =
+                Enum.TextXAlignment.Left
+
+            childControl.Visible =
+                expanded
+
+            UpdateChildPosition()
+
+            local childCorner =
+                Instance.new(
+                    "UICorner"
+                )
+
+            childCorner.CornerRadius =
+                UDim.new(
+                    0,
+                    8
+                )
+
+            childCorner.Parent =
+                childControl
+
+            local childLever =
+                Instance.new(
+                    "Frame"
+                )
+
+            childLever.Parent =
+                childControl
+
+            childLever.Size =
+                UDim2.new(
+                    0,
+                    65,
+                    0,
+                    28
+                )
+
+            childLever.Position =
+                UDim2.new(
+                    1,
+                    -75,
+                    0.5,
+                    -14
+                )
+
+            childLever.BorderSizePixel =
+                0
+
+            local childLeverCorner =
+                Instance.new(
+                    "UICorner"
+                )
+
+            childLeverCorner.CornerRadius =
+                UDim.new(
+                    1,
+                    0
+                )
+
+            childLeverCorner.Parent =
+                childLever
+
+            local childLeverText =
+                Instance.new(
+                    "TextLabel"
+                )
+
+            childLeverText.Parent =
+                childLever
+
+            childLeverText.Size =
+                UDim2.new(
+                    1,
+                    0,
+                    1,
+                    0
+                )
+
+            childLeverText.BackgroundTransparency =
+                1
+
+            childLeverText.TextSize =
+                12
+
+            childLeverText.Font =
+                Enum.Font.GothamBold
+
+            childLeverText.TextColor3 =
+                Color3.fromRGB(
+                    255,
+                    255,
+                    255
+                )
+
+            childLeverText.TextXAlignment =
+                Enum.TextXAlignment.Center
+
+            local childCircle =
+                Instance.new(
+                    "Frame"
+                )
+
+            childCircle.Parent =
+                childLever
+
+            childCircle.Size =
+                UDim2.new(
+                    0,
+                    22,
+                    0,
+                    22
+                )
+
+            childCircle.BorderSizePixel =
+                0
+
+            childCircle.BackgroundColor3 =
+                Color3.fromRGB(
+                    255,
+                    255,
+                    255
+                )
+
+            local childCircleCorner =
+                Instance.new(
+                    "UICorner"
+                )
+
+            childCircleCorner.CornerRadius =
+                UDim.new(
+                    1,
+                    0
+                )
+
+            childCircleCorner.Parent =
+                childCircle
+
+            local function UpdateChildLever()
+
+                if data.ChildEnabled then
+
+                    childLever.BackgroundColor3 =
+                        Color3.fromRGB(
+                            0,
+                            150,
+                            0
+                        )
+
+                    childLeverText.Text =
+                        "ON"
+
+                    childCircle.Position =
+                        UDim2.new(
+                            1,
+                            -25,
+                            0.5,
+                            -11
+                        )
+
+                else
+
+                    childLever.BackgroundColor3 =
+                        Color3.fromRGB(
+                            70,
+                            70,
+                            70
+                        )
+
+                    childLeverText.Text =
+                        "OFF"
+
+                    childCircle.Position =
+                        UDim2.new(
+                            0,
+                            3,
+                            0.5,
+                            -11
+                        )
                 end
             end
 
-            --------------------------------------------------
-            -- HEADER
-            --------------------------------------------------
+            UpdateChildLever()
 
-            UpdateCount()
-
-            arrow.Text =
-                expanded
-                and "▲"
-                or "▼"
-
-            header.MouseButton1Click:Connect(
+            childControl.MouseButton1Click:Connect(
                 function()
 
-                    data.Expanded =
-                        not data.Expanded
+                    if data.Min
+                        and #data.Selected
+                            < data.Min then
 
-                    if data.Expanded then
-
-                        root.Size =
-                            UDim2.new(
-                                1,
-                                0,
-                                0,
-                                GetExpandedHeight()
-                            )
-
-                        scrollFrame.Visible =
-                            true
-
-                        if childControl then
-                            childControl.Visible =
-                                true
-                        end
-
-                        arrow.Text =
-                            "▲"
-
-                    else
-
-                        root.Size =
-                            UDim2.new(
-                                1,
-                                0,
-                                0,
-                                45
-                            )
-
-                        scrollFrame.Visible =
-                            false
-
-                        if childControl then
-                            childControl.Visible =
-                                false
-                        end
-
-                        arrow.Text =
-                            "▼"
+                        return
                     end
 
-                    UpdateMainScroll()
+                    data.ChildEnabled =
+                        not data.ChildEnabled
+
+                    if data.ChildSave then
+
+                        SetSavedValue(
+                            data.ChildSaveKey,
+                            data.ChildEnabled
+                        )
+                    end
+
+                    UpdateChildLever()
+
+                    if typeof(
+                        data.ChildCallback
+                    ) == "function" then
+
+                        task.spawn(
+                            function()
+
+                                pcall(
+                                    function()
+
+                                        data.ChildCallback(
+                                            data.ChildEnabled,
+                                            data.Selected
+                                        )
+
+                                    end
+                                )
+                            end
+                        )
+                    end
                 end
             )
+
+            if data.ChildEnabled
+                and #data.Selected > 0
+                and typeof(
+                    data.ChildCallback
+                ) == "function" then
+
+                task.spawn(
+                    function()
+
+                        pcall(
+                            function()
+
+                                data.ChildCallback(
+                                    true,
+                                    data.Selected
+                                )
+
+                            end
+                        )
+                    end
+                )
+            end
         end
+
+        --------------------------------------------------
+        -- FINAL UPDATE
+        --------------------------------------------------
+
+        UpdateCount()
+
+        arrow.Text =
+            expanded
+            and "▲"
+            or "▼"
+
+        --------------------------------------------------
+        -- HEADER CLICK
+        --------------------------------------------------
+
+        header.MouseButton1Click:Connect(
+            function()
+
+                data.Expanded =
+                    not data.Expanded
+
+                if data.Expanded then
+
+                    --------------------------------------------------
+                    -- MỞ
+                    --------------------------------------------------
+
+                    root.Size =
+                        UDim2.new(
+                            1,
+                            0,
+                            0,
+                            GetRootHeight()
+                        )
+
+                    scrollFrame.Visible =
+                        true
+
+                    if childControl then
+
+                        -- ChildClick vẫn độc lập
+                        -- với ScrollFrame
+                        childControl.Visible =
+                            true
+
+                        UpdateChildPosition()
+                    end
+
+                    arrow.Text =
+                        "▲"
+
+                else
+
+                    --------------------------------------------------
+                    -- ĐÓNG
+                    --------------------------------------------------
+
+                    root.Size =
+                        UDim2.new(
+                            1,
+                            0,
+                            0,
+                            HEADER_HEIGHT
+                        )
+
+                    scrollFrame.Visible =
+                        false
+
+                    -- KHÔNG cho ChildClick tự chui vào ScrollFrame
+                    -- và không bị CanvasPosition ảnh hưởng
+                    if childControl then
+
+                        childControl.Visible =
+                            false
+                    end
+
+                    arrow.Text =
+                        "▼"
+                end
+
+                UpdateMainScroll()
+            end
+        )
+    end
     end
 
     UpdateMainScroll()
