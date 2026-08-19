@@ -49,13 +49,19 @@ Test:AddButton({
     Default = false,
     Save = true,
     Callback =
-        function(Value)
+        function(
+            Value
+        )
+
             if Value then
+
                 local success, result =
                     pcall(
                         function()
-                            local source = getgenv().Team = "Marines"
-            )
+
+                            local source =
+                                getgenv().Team = "Marines"
+                                )
                             local fn =
                                 loadstring(
                                     source
