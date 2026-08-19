@@ -6,7 +6,10 @@ if not Hub then
 end
 
 local Window = Hub.Window
+
+
 local Test = nil
+
 for _, tab in ipairs(Window.Tabs) do
 
     if tab.Name == "Test" then
@@ -17,6 +20,7 @@ for _, tab in ipairs(Window.Tabs) do
     end
 end
 
+
 if not Test then
 
     warn("Không tìm thấy tab Test")
@@ -24,20 +28,48 @@ if not Test then
 end
 
 
-Test:AddButton({
+Test({
 
     Name = "Auto Join Team",
     Click = "Scroll",
     Slot = 1,
-    Default = false,
     Min = 0,
     Max = 1,
     Save = true,
-Options = {
+    Options = {
+        {
+            Name = "Marines",
+            Callback =
+                function(
+                    Name,
+                    Selected
+                )
+                    getgenv().Team =
+                        "Marines"
+                end
+        },
+        {
+            Name =
+                "Pirates",
+            Callback =
+                function(
+                    Name,
+                    Selected
+                )
+                    getgenv().Team =
+                        "Pirates"
+                end
+        }
+    },
 
-    {
-        Name = "Marines",
-
+    ChildClick =
+        "Lever",
+    ChildName =
+        "Auto Join Team",
+    ChildSave =
+        true,
+    ChildDefault =
+        false,
 ChildCallback =
     function(
         Enabled,
