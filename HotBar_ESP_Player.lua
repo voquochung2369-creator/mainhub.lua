@@ -17,13 +17,14 @@ local Players =
 local RunService =
     game:GetService("RunService")
 
+
 local LocalPlayer =
     Players.LocalPlayer
 
 
 
 --------------------------------------------------
--- CLOSE OLD ESP
+-- REMOVE OLD ESP
 --------------------------------------------------
 
 if _G.CustomHubESP then
@@ -56,16 +57,12 @@ local Connections =
 
 
 
+
 --------------------------------------------------
 -- CLEAR ESP
 --------------------------------------------------
 
 local function ClearESP()
-
-
-    ESPEnabled =
-        false
-
 
 
     for _, obj in pairs(
@@ -78,7 +75,6 @@ local function ClearESP()
             obj:Destroy()
 
         end)
-
 
     end
 
@@ -101,7 +97,6 @@ local function ClearESP()
 
         end)
 
-
     end
 
 
@@ -112,7 +107,7 @@ local function ClearESP()
 
 
 
-    -- Xóa Highlight còn sót
+    -- remove leftover highlight
 
     for _, player in ipairs(
         Players:GetPlayers()
@@ -154,7 +149,7 @@ local function ClearESP()
 
 
 
-    -- Xóa Billboard còn sót
+    -- remove leftover gui
 
     pcall(function()
 
@@ -182,6 +177,7 @@ local function ClearESP()
     end)
 
 
+
 end
 
 
@@ -205,7 +201,6 @@ local function CreateESP(
 
     local character =
         player.Character
-
 
 
     if not character then
@@ -252,7 +247,7 @@ local function CreateESP(
 
 
     --------------------------------------------------
-    -- REMOVE ON DEATH
+    -- DEATH REMOVE
     --------------------------------------------------
 
     local deathConnection
@@ -263,16 +258,13 @@ local function CreateESP(
             function()
 
 
-                dead =
-                    true
+                dead = true
 
 
 
                 if highlight then
 
-
                     highlight:Destroy()
-
 
                 end
 
@@ -280,12 +272,9 @@ local function CreateESP(
 
                 if gui then
 
-
                     gui:Destroy()
 
-
                 end
-
 
 
             end
@@ -303,8 +292,9 @@ local function CreateESP(
 
 
 
+
     --------------------------------------------------
-    -- HIGHLIGHT
+    -- BODY OUTLINE
     --------------------------------------------------
 
     highlight =
@@ -378,7 +368,7 @@ local function CreateESP(
 
 
 
-    -- Không hiện text bản thân
+    -- không hiện text bản thân
 
     if player == LocalPlayer then
 
@@ -390,8 +380,9 @@ local function CreateESP(
 
 
 
+
     --------------------------------------------------
-    -- INFO
+    -- INFO GUI
     --------------------------------------------------
 
     gui =
@@ -419,14 +410,12 @@ local function CreateESP(
         )
 
 
-
     gui.StudsOffset =
         Vector3.new(
             0,
             4,
             0
         )
-
 
 
     gui.AlwaysOnTop =
@@ -446,11 +435,11 @@ local function CreateESP(
 
 
 
+
     local text =
         Instance.new(
             "TextLabel"
         )
-
 
 
     text.Size =
@@ -595,7 +584,6 @@ local function CreateESP(
         )
 
 
-
     table.insert(
         Connections,
         updateConnection
@@ -609,13 +597,81 @@ end
 
 
 --------------------------------------------------
--- UPDATE ALL
+-- SETUP PLAYER RESPAWN
+--------------------------------------------------
+
+local function SetupPlayer(
+    player
+)
+
+
+    player.CharacterAdded:Connect(
+        function()
+
+
+            task.wait(1)
+
+
+            if ESPEnabled then
+
+
+                CreateESP(
+                    player
+                )
+
+
+            end
+
+
+        end
+    )
+
+
+end
+
+
+
+
+for _, player in ipairs(
+    Players:GetPlayers()
+) do
+
+
+    SetupPlayer(
+        player
+    )
+
+
+end
+
+
+
+
+Players.PlayerAdded:Connect(
+    function(player)
+
+
+        SetupPlayer(
+            player
+        )
+
+
+    end
+)
+
+
+
+
+
+--------------------------------------------------
+-- UPDATE ALL ESP
 --------------------------------------------------
 
 local function UpdateESP()
 
 
     ClearESP()
+
 
 
     ESPEnabled =
@@ -643,44 +699,7 @@ end
 
 
 --------------------------------------------------
--- PLAYER JOIN
---------------------------------------------------
-
-Players.PlayerAdded:Connect(
-    function(player)
-
-
-        player.CharacterAdded:Connect(
-            function()
-
-
-                task.wait(1)
-
-
-                if ESPEnabled then
-
-
-                    CreateESP(
-                        player
-                    )
-
-
-                end
-
-
-            end
-        )
-
-
-    end
-)
-
-
-
-
-
---------------------------------------------------
--- PLAYER LEAVE
+-- PLAYER REMOVE
 --------------------------------------------------
 
 Players.PlayerRemoving:Connect(
@@ -721,16 +740,14 @@ Players.PlayerRemoving:Connect(
 
 
 --------------------------------------------------
--- HUB CONTROL
+-- HUB API
 --------------------------------------------------
 
 _G.CustomHubESP = {
 
 
     Toggle =
-        function(
-            Value
-        )
+        function(Value)
 
 
             if Value then
@@ -740,6 +757,10 @@ _G.CustomHubESP = {
 
 
             else
+
+
+                ESPEnabled =
+                    false
 
 
                 ClearESP()
@@ -756,6 +777,10 @@ _G.CustomHubESP = {
         function()
 
 
+            ESPEnabled =
+                false
+
+
             ClearESP()
 
 
@@ -765,7 +790,10 @@ _G.CustomHubESP = {
 
         end
 
+
 }
+
+
 
 
 
