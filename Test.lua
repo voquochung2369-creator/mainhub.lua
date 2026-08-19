@@ -38,38 +38,42 @@ Options = {
     {
         Name = "Marines",
 
-        Callback = function()
+ChildCallback =
+    function(
+        Enabled,
+        Selected
+    )
 
-            getgenv().Team = "Marines"
+        if Enabled then
 
-            game:GetService("ReplicatedStorage")
-                .Remotes
-                .CommF_:InvokeServer(
-                    "SetTeam",
+            if Selected[1] == "Marines" then
+
+                getgenv().Team =
                     "Marines"
-                )
 
-        end
-    },
+                game:GetService("ReplicatedStorage")
+                    .Remotes
+                    .CommF_:InvokeServer(
+                        "SetTeam",
+                        "Marines"
+                    )
 
 
-    {
-        Name = "Pirates",
+            elseif Selected[1] == "Pirates" then
 
-        Callback = function()
-
-            getgenv().Team = "Pirates"
-
-            game:GetService("ReplicatedStorage")
-                .Remotes
-                .CommF_:InvokeServer(
-                    "SetTeam",
+                getgenv().Team =
                     "Pirates"
-                )
+
+                game:GetService("ReplicatedStorage")
+                    .Remotes
+                    .CommF_:InvokeServer(
+                        "SetTeam",
+                        "Pirates"
+                    )
+
+            end
 
         end
-    }
-}
-end
-end
+
+    end
 })
