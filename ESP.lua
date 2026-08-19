@@ -63,24 +63,28 @@ ESP:AddButton({
     Save =
         true,
 
-    Callback =
-        function(
+Callback = function(Value)
+
+    local source =
+        game:HttpGet(
+            "LINK_ESP_PLAYER.lua"
+        )
+
+    local fn =
+        loadstring(source)
+
+    fn()
+
+
+    if _G.CustomHubESP then
+
+        _G.CustomHubESP.Toggle(
             Value
         )
 
-            if Value then
+    end
 
-                print(
-                    "Player ESP ON"
-                )
-
-            else
-
-                print(
-                    "Player ESP OFF"
-                )
-            end
-        end
+end
 })
 
 --------------------------------------------------
