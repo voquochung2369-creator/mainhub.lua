@@ -1146,10 +1146,10 @@ FakeStroke.Parent =
 --------------------------------------------------
 
 FakeHubButton.BackgroundTransparency =
-    1
+    0.18
 
 FakeHubButton.TextTransparency =
-    1
+    0
 
 FakeStroke.Transparency =
     1
