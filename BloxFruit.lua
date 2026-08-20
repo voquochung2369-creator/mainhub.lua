@@ -271,33 +271,41 @@ Bloxfruit:AddButton({
     ChildName = "Auto Join Team",
     ChildSave = true,
     ChildDefault = false,
-    ChildCallback = function(
-            Enabled,
-            Selected
-        )
+ChildCallback = function(Enabled, Selected)
 
-        if Enabled then
-              task.wait(1) 
-            if Selected[1] == "Marines" then
-                getgenv().Team = "Marines"
-                game:GetService("ReplicatedStorage")
-                    .Remotes
-                    .CommF_:InvokeServer(
-                        "SetTeam",
-                        "Marines"
-                    )
+    if Enabled then
+        task.wait(1)
 
+        local Player = game:GetService("Players").LocalPlayer
 
-            elseif Selected[1] == "Pirates" then
-                task.wait(1)
-                getgenv().Team = "Pirates"
-                game:GetService("ReplicatedStorage")
-                    .Remotes
-                    .CommF_:InvokeServer(
-                        "SetTeam",
-                        "Pirates"
-                    )
+        if Selected[1] == "Marines" then
+            getgenv().Team = "Marines"
+
+            if Player.Team and Player.Team.Name == "Marines" then
+                return
             end
+
+            game:GetService("ReplicatedStorage")
+                .Remotes
+                .CommF_:InvokeServer(
+                    "SetTeam",
+                    "Marines"
+                )
+
+        elseif Selected[1] == "Pirates" then
+            getgenv().Team = "Pirates"
+
+            if Player.Team and Player.Team.Name == "Pirates" then
+                return
+            end
+
+            game:GetService("ReplicatedStorage")
+                .Remotes
+                .CommF_:InvokeServer(
+                    "SetTeam",
+                    "Pirates"
+                )
         end
     end
+end
 })
