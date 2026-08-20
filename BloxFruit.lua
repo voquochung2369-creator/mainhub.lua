@@ -277,7 +277,7 @@ Bloxfruit:AddButton({
         )
 
         if Enabled then
-              task.wait(2) 
+              task.wait(1) 
             if Selected[1] == "Marines" then
                 getgenv().Team = "Marines"
                 game:GetService("ReplicatedStorage")
@@ -289,7 +289,7 @@ Bloxfruit:AddButton({
 
 
             elseif Selected[1] == "Pirates" then
-                task.wait(2)
+                task.wait(1)
                 getgenv().Team = "Pirates"
                 game:GetService("ReplicatedStorage")
                     .Remotes
