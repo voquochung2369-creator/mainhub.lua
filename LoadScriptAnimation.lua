@@ -3,7 +3,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 --------------------------------------------------
--- CONFIG         
+-- CONFIG            
 --------------------------------------------------
 
 local ANIMATION_GUI_NAME = "CustomHub_LoadAnimation"
