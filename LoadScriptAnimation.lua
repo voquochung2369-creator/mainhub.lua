@@ -6,128 +6,97 @@ local RunService = game:GetService("RunService")
 -- CONFIG
 --------------------------------------------------
 
-local ANIMATION_GUI_NAME = "CustomHub_LoadAnimation"
+local HUB_UI_NAME = "HubUi"
+local HUB_BUTTON_NAME = "HubButton"
 
-local BALL_COUNT = 7
+local WAIT_TIMEOUT = 10
 
-local BALL_SIZE = 22
-local BIG_BALL_SIZE = 58
+local ORB_COUNT = 7
+local ORB_SIZE = 22
+local ORB_COLOR = Color3.fromRGB(145,70,220)
+local ORB_GLOW_COLOR = Color3.fromRGB(255,220,70)
 
-local MOVE_TIME = 0.9
-local ROTATE_TIME = 2.2
+local GATHER_TIME = 0.9
+local ORBIT_TIME = 2.2
+local ORBIT_RADIUS = 55
+local ORBIT_SPEED = 1.15
 
-local FLASH_COUNT = 7
-local FLASH_ON_TIME = 0.2
-local FLASH_OFF_TIME = 0.3
+local BLINK_COUNT = 7
+local BLINK_ON_TIME = 0.2
+local BLINK_OFF_TIME = 0.3
 
-local MERGE_TIME = 0.75
+local CORE_GROW_TIME = 0.35
+local EXPLOSION_COUNT = 18
+local EXPLOSION_SPEED = 0.65
+local EXPLOSION_DISTANCE = 90
 
-local EXPLOSION_PARTS = 14
-local EXPLOSION_DISTANCE = 75
-local EXPLOSION_TIME = 0.8
-
-local HUB_MOVE_TIME = 1.4
-
-local PURPLE = Color3.fromRGB(
-    155,
-    55,
-    255
-)
-
-local PURPLE_DARK = Color3.fromRGB(
-    90,
-    20,
-    160
-)
-
-local GOLD = Color3.fromRGB(
-    255,
-    215,
-    60
-)
-
-local GOLD_BRIGHT = Color3.fromRGB(
-    255,
-    235,
-    100
-)
+local FAKE_BUTTON_TIME = 1.8
 
 --------------------------------------------------
--- REMOVE OLD ANIMATION
+-- FIND ORIGINAL GUI
 --------------------------------------------------
 
-local oldAnimation =
-    CoreGui:FindFirstChild(
-        ANIMATION_GUI_NAME
-    )
+local function GetHub()
 
-if oldAnimation then
-    pcall(function()
-        oldAnimation:Destroy()
-    end)
-end
+    local start = tick()
 
---------------------------------------------------
--- FIND HUB
---------------------------------------------------
+    while tick() - start < WAIT_TIMEOUT do
 
-local HubUi =
-    CoreGui:FindFirstChild(
-        "HubUi"
-    )
+        local hubUi = CoreGui:FindFirstChild(HUB_UI_NAME)
 
-if not HubUi then
-    warn(
-        "[CustomHub] LoadScriptAnimation: HubUi not found"
-    )
-    return
-end
+        if hubUi then
 
-local HubButton =
-    HubUi:FindFirstChild(
-        "HubButton",
-        true
-    )
+            local hubButton =
+                hubUi:FindFirstChild(HUB_BUTTON_NAME)
 
-if not HubButton then
-    warn(
-        "[CustomHub] LoadScriptAnimation: HubButton not found"
-    )
-    return
-end
+            if hubButton then
+                return hubUi,hubButton
+            end
+        end
 
---------------------------------------------------
--- WAIT FOR SIZE
---------------------------------------------------
-
-local timeout =
-    0
-
-while HubButton.AbsoluteSize.X <= 0
-    or HubButton.AbsoluteSize.Y <= 0 do
-
-    task.wait()
-
-    timeout =
-        timeout + 1
-
-    if timeout > 100 then
-        break
+        task.wait(0.1)
     end
+
+    warn(
+        "[CustomHub] LoadScriptAnimation: Không tìm thấy HubUi/HubButton."
+    )
+
+    return nil,nil
+end
+
+local HubUi,HubButton = GetHub()
+
+if not HubUi or not HubButton then
+    return
 end
 
 --------------------------------------------------
--- SAVE ORIGINAL HUB STATE
+-- CLEAN OLD ANIMATION
+--------------------------------------------------
+
+local OldAnimation =
+    CoreGui:FindFirstChild("CustomHub_LoadAnimation")
+
+if OldAnimation then
+
+    pcall(function()
+        OldAnimation:Destroy()
+    end)
+
+end
+
+--------------------------------------------------
+-- SAVE ORIGINAL BUTTON STATE
 --------------------------------------------------
 
 local OriginalPosition =
     HubButton.Position
 
-local OriginalAnchorPoint =
-    HubButton.AnchorPoint
-
 local OriginalSize =
     HubButton.Size
+
+local OriginalAnchorPoint =
+    HubButton.AnchorPoint
 
 local OriginalRotation =
     HubButton.Rotation
@@ -139,13 +108,6 @@ local OriginalZIndex =
     HubButton.ZIndex
 
 --------------------------------------------------
--- HIDE REAL HUB BUTTON
---------------------------------------------------
-
-HubButton.Visible =
-    false
-
---------------------------------------------------
 -- ANIMATION GUI
 --------------------------------------------------
 
@@ -153,7 +115,7 @@ local AnimationGui =
     Instance.new("ScreenGui")
 
 AnimationGui.Name =
-    ANIMATION_GUI_NAME
+    "CustomHub_LoadAnimation"
 
 AnimationGui.ResetOnSpawn =
     false
@@ -162,7 +124,7 @@ AnimationGui.IgnoreGuiInset =
     true
 
 AnimationGui.ZIndexBehavior =
-    Enum.ZIndexBehavior.Sibling
+    Enum.ZIndexBehavior.Global
 
 AnimationGui.DisplayOrder =
     999999
@@ -171,637 +133,479 @@ AnimationGui.Parent =
     CoreGui
 
 --------------------------------------------------
--- GET VIEWPORT
+-- HIDE REAL HUB BUTTON
 --------------------------------------------------
 
-local function GetViewport()
-
-    local Camera =
-        workspace.CurrentCamera
-
-    if not Camera then
-        return Vector2.new(
-            1920,
-            1080
-        )
-    end
-
-    return Camera.ViewportSize
-end
+HubButton.Visible = false
 
 --------------------------------------------------
--- CENTER
+-- CAMERA
 --------------------------------------------------
 
-local function GetCenter()
+local Camera =
+    workspace.CurrentCamera
 
-    local viewport =
-        GetViewport()
+if not Camera then
 
-    return Vector2.new(
-        viewport.X / 2,
-        viewport.Y / 2
-    )
-end
+    AnimationGui:Destroy()
 
---------------------------------------------------
--- CREATE BALL
---------------------------------------------------
+    HubButton.Visible =
+        OriginalVisible
 
-local function CreateBall()
-
-    local holder =
-        Instance.new("Frame")
-
-    holder.Size =
-        UDim2.fromOffset(
-            BALL_SIZE,
-            BALL_SIZE
-        )
-
-    holder.AnchorPoint =
-        Vector2.new(
-            0.5,
-            0.5
-        )
-
-    holder.BackgroundTransparency =
-        1
-
-    holder.BorderSizePixel =
-        0
-
-    holder.ZIndex =
-        10
-
-    holder.Parent =
-        AnimationGui
-
-    --------------------------------------------------
-    -- PURPLE CORE
-    --------------------------------------------------
-
-    local core =
-        Instance.new("Frame")
-
-    core.Name =
-        "PurpleCore"
-
-    core.Size =
-        UDim2.fromScale(
-            0.72,
-            0.72
-        )
-
-    core.AnchorPoint =
-        Vector2.new(
-            0.5,
-            0.5
-        )
-
-    core.Position =
-        UDim2.fromScale(
-            0.5,
-            0.5
-        )
-
-    core.BackgroundColor3 =
-        PURPLE
-
-    core.BorderSizePixel =
-        0
-
-    core.ZIndex =
-        11
-
-    core.Parent =
-        holder
-
-    local coreCorner =
-        Instance.new("UICorner")
-
-    coreCorner.CornerRadius =
-        UDim.new(
-            1,
-            0
-        )
-
-    coreCorner.Parent =
-        core
-
-    --------------------------------------------------
-    -- GOLD GLOW
-    --------------------------------------------------
-
-    local glow =
-        Instance.new("UIStroke")
-
-    glow.Name =
-        "GoldenGlow"
-
-    glow.Color =
-        GOLD
-
-    glow.Thickness =
-        2.2
-
-    glow.Transparency =
-        0.05
-
-    glow.ApplyStrokeMode =
-        Enum.ApplyStrokeMode.Border
-
-    glow.Parent =
-        core
-
-    --------------------------------------------------
-    -- OUTER PURPLE RING
-    --------------------------------------------------
-
-    local outer =
-        Instance.new("UIStroke")
-
-    outer.Name =
-        "PurpleOuter"
-
-    outer.Color =
-        PURPLE_DARK
-
-    outer.Thickness =
-        1
-
-    outer.Transparency =
-        0.15
-
-    outer.ApplyStrokeMode =
-        Enum.ApplyStrokeMode.Border
-
-    outer.Parent =
-        holder
-
-    --------------------------------------------------
-    -- GOLD STAR
-    --------------------------------------------------
-
-    local star =
-        Instance.new("TextLabel")
-
-    star.Name =
-        "GoldenStar"
-
-    star.Size =
-        UDim2.fromScale(
-            1,
-            1
-        )
-
-    star.Position =
-        UDim2.fromScale(
-            0,
-            0
-        )
-
-    star.BackgroundTransparency =
-        1
-
-    star.Text =
-        "★"
-
-    star.TextColor3 =
-        GOLD_BRIGHT
-
-    star.TextSize =
-        14
-
-    star.Font =
-        Enum.Font.GothamBold
-
-    star.TextXAlignment =
-        Enum.TextXAlignment.Center
-
-    star.TextYAlignment =
-        Enum.TextYAlignment.Center
-
-    star.ZIndex =
-        12
-
-    star.Parent =
-        holder
-
-    --------------------------------------------------
-    -- STAR OUTLINE
-    --------------------------------------------------
-
-    local starStroke =
-        Instance.new("UIStroke")
-
-    starStroke.Color =
-        GOLD
-
-    starStroke.Thickness =
-        0.8
-
-    starStroke.Transparency =
-        0.15
-
-    starStroke.Parent =
-        star
-
-    return {
-        Holder = holder,
-        Core = core,
-        Glow = glow,
-        Outer = outer,
-        Star = star
-    }
-end
-
---------------------------------------------------
--- CREATE 7 BALLS
---------------------------------------------------
-
-local Balls = {}
-
-for i = 1, BALL_COUNT do
-
-    local ball =
-        CreateBall()
-
-    table.insert(
-        Balls,
-        ball
-    )
-end
-
---------------------------------------------------
--- RANDOM START POSITIONS
---------------------------------------------------
-
-local viewport =
-    GetViewport()
-
-local function RandomPosition()
-
-    local margin =
-        70
-
-    local x =
-        math.random(
-            margin,
-            math.max(
-                margin + 1,
-                math.floor(
-                    viewport.X - margin
-                )
-            )
-        )
-
-    local y =
-        math.random(
-            margin,
-            math.max(
-                margin + 1,
-                math.floor(
-                    viewport.Y - margin
-                )
-            )
-        )
-
-    return UDim2.fromOffset(
-        x,
-        y
-    )
-end
-
-for _, ball in ipairs(Balls) do
-
-    ball.Holder.Position =
-        RandomPosition()
-
-    ball.Holder.Rotation =
-        math.random(
-            -180,
-            180
-        )
-end
-
---------------------------------------------------
--- GET CENTER POSITION
---------------------------------------------------
-
-local Center =
-    GetCenter()
-
---------------------------------------------------
--- MOVE 7 BALLS TO CENTER
---------------------------------------------------
-
-local moveInfo =
-    TweenInfo.new(
-        MOVE_TIME,
-        Enum.EasingStyle.Quint,
-        Enum.EasingDirection.Out
-    )
-
-local moveTweens = {}
-
-for _, ball in ipairs(Balls) do
-
-    local tween =
-        TweenService:Create(
-            ball.Holder,
-            moveInfo,
-            {
-                Position =
-                    UDim2.fromOffset(
-                        Center.X,
-                        Center.Y
-                    )
-            }
-        )
-
-    table.insert(
-        moveTweens,
-        tween
-    )
-
-    tween:Play()
-end
-
-task.wait(
-    MOVE_TIME
-)
-
---------------------------------------------------
--- 7 BALLS ROTATE AROUND CENTER
---------------------------------------------------
-
-local orbitRadius =
-    55
-
-local rotateStart =
-    os.clock()
-
-local rotateConnection
-
-rotateConnection =
-    RunService.RenderStepped:Connect(
-        function()
-
-            local elapsed =
-                os.clock()
-                - rotateStart
-
-            local progress =
-                math.clamp(
-                    elapsed / ROTATE_TIME,
-                    0,
-                    1
-                )
-
-            local angleOffset =
-                elapsed
-                * math.rad(
-                    85
-                )
-
-            for index, ball in ipairs(Balls) do
-
-                local angle =
-                    angleOffset
-                    + (
-                        (index - 1)
-                        * (
-                            math.pi * 2
-                            / BALL_COUNT
-                        )
-                    )
-
-                local x =
-                    Center.X
-                    + math.cos(angle)
-                    * orbitRadius
-
-                local y =
-                    Center.Y
-                    + math.sin(angle)
-                    * orbitRadius
-
-                ball.Holder.Position =
-                    UDim2.fromOffset(
-                        x,
-                        y
-                    )
-
-                ball.Holder.Rotation =
-                    math.deg(angle)
-                    + 90
-
-                local scale =
-                    0.95
-                    + (
-                        math.sin(
-                            elapsed * 3
-                        ) * 0.05
-                    )
-
-                ball.Holder.Size =
-                    UDim2.fromOffset(
-                        BALL_SIZE * scale,
-                        BALL_SIZE * scale
-                    )
-            end
-        end
-    )
-
-task.wait(
-    ROTATE_TIME
-)
-
-if rotateConnection then
-    rotateConnection:Disconnect()
-    rotateConnection = nil
-end
-
---------------------------------------------------
--- FLASH GOLD BORDER 7 TIMES
---------------------------------------------------
-
-for flash = 1, FLASH_COUNT do
-
-    for _, ball in ipairs(Balls) do
-
-        TweenService:Create(
-            ball.Glow,
-            TweenInfo.new(
-                FLASH_ON_TIME,
-                Enum.EasingStyle.Sine,
-                Enum.EasingDirection.Out
-            ),
-            {
-                Thickness = 5,
-                Transparency = 0
-            }
-        ):Play()
-
-        TweenService:Create(
-            ball.Star,
-            TweenInfo.new(
-                FLASH_ON_TIME,
-                Enum.EasingStyle.Sine,
-                Enum.EasingDirection.Out
-            ),
-            {
-                TextColor3 =
-                    Color3.fromRGB(
-                        255,
-                        245,
-                        150
-                    )
-            }
-        ):Play()
-    end
-
-    task.wait(
-        FLASH_ON_TIME
-    )
-
-    for _, ball in ipairs(Balls) do
-
-        TweenService:Create(
-            ball.Glow,
-            TweenInfo.new(
-                FLASH_OFF_TIME,
-                Enum.EasingStyle.Sine,
-                Enum.EasingDirection.Out
-            ),
-            {
-                Thickness = 2.2,
-                Transparency = 0.05
-            }
-        ):Play()
-
-        TweenService:Create(
-            ball.Star,
-            TweenInfo.new(
-                FLASH_OFF_TIME,
-                Enum.EasingStyle.Sine,
-                Enum.EasingDirection.Out
-            ),
-            {
-                TextColor3 =
-                    GOLD_BRIGHT
-            }
-        ):Play()
-    end
-
-    task.wait(
-        FLASH_OFF_TIME
-    )
-end
-
---------------------------------------------------
--- MERGE INTO ONE BIG BALL
---------------------------------------------------
-
-local mergeInfo =
-    TweenInfo.new(
-        MERGE_TIME,
-        Enum.EasingStyle.Quint,
-        Enum.EasingDirection.InOut
-    )
-
-for _, ball in ipairs(Balls) do
-
-    TweenService:Create(
-        ball.Holder,
-        mergeInfo,
-        {
-            Position =
-                UDim2.fromOffset(
-                    Center.X,
-                    Center.Y
-                ),
-
-            Size =
-                UDim2.fromOffset(
-                    BIG_BALL_SIZE,
-                    BIG_BALL_SIZE
-                )
-        }
-    ):Play()
-end
-
-task.wait(
-    MERGE_TIME
-)
-
---------------------------------------------------
--- REMOVE 6 BALLS
---------------------------------------------------
-
-for index, ball in ipairs(Balls) do
-
-    if index > 1 then
-
-        pcall(function()
-            ball.Holder:Destroy()
-        end)
-    end
-end
-
-local BigBall =
-    Balls[1]
-
-if not BigBall then
-    pcall(function()
-        AnimationGui:Destroy()
-    end)
-
-    HubButton.Visible = true
     return
 end
 
+local Viewport =
+    Camera.ViewportSize
+
+local CenterX =
+    Viewport.X / 2
+
+local CenterY =
+    Viewport.Y / 2
+
 --------------------------------------------------
--- BIG BALL EFFECT
+-- HELPERS
 --------------------------------------------------
 
-BigBall.Holder.Size =
-    UDim2.fromOffset(
-        BIG_BALL_SIZE,
-        BIG_BALL_SIZE
+local function NewCorner(parent,radius)
+
+    local corner =
+        Instance.new("UICorner")
+
+    corner.CornerRadius =
+        UDim.new(
+            radius or 1,
+            0
+        )
+
+    corner.Parent =
+        parent
+
+    return corner
+end
+
+local function NewStroke(
+    parent,
+    color,
+    thickness,
+    transparency
+)
+
+    local stroke =
+        Instance.new("UIStroke")
+
+    stroke.Color =
+        color
+
+    stroke.Thickness =
+        thickness
+
+    stroke.Transparency =
+        transparency or 0
+
+    stroke.Parent =
+        parent
+
+    return stroke
+end
+
+local function Tween(
+    object,
+    time,
+    properties,
+    style,
+    direction
+)
+
+    local info =
+        TweenInfo.new(
+            time,
+            style or Enum.EasingStyle.Quad,
+            direction or Enum.EasingDirection.Out
+        )
+
+    local tween =
+        TweenService:Create(
+            object,
+            info,
+            properties
+        )
+
+    tween:Play()
+
+    return tween
+end
+
+--------------------------------------------------
+-- CREATE ORB
+--------------------------------------------------
+
+local function CreateOrb()
+
+    local orb =
+        Instance.new("Frame")
+
+    orb.Name =
+        "PurpleOrb"
+
+    orb.Size =
+        UDim2.new(
+            0,
+            ORB_SIZE,
+            0,
+            ORB_SIZE
+        )
+
+    orb.AnchorPoint =
+        Vector2.new(
+            0.5,
+            0.5
+        )
+
+    orb.BackgroundColor3 =
+        ORB_COLOR
+
+    orb.BackgroundTransparency =
+        0
+
+    orb.BorderSizePixel =
+        0
+
+    orb.ZIndex =
+        20
+
+    NewCorner(
+        orb,
+        1
     )
 
-BigBall.Core.BackgroundColor3 =
-    PURPLE
+    local stroke =
+        NewStroke(
+            orb,
+            ORB_GLOW_COLOR,
+            2,
+            0
+        )
 
-BigBall.Glow.Thickness =
-    4
+    --------------------------------------------------
+    -- SMALL YELLOW GLOW
+    --------------------------------------------------
 
-BigBall.Glow.Transparency =
-    0
+    local glow =
+        Instance.new("Frame")
 
-BigBall.Star.TextSize =
-    30
+    glow.Name =
+        "YellowGlow"
+
+    glow.Size =
+        UDim2.new(
+            1,
+            8,
+            1,
+            8
+        )
+
+    glow.Position =
+        UDim2.new(
+            0.5,
+            -4,
+            0.5,
+            -4
+        )
+
+    glow.AnchorPoint =
+        Vector2.new(
+            0.5,
+            0.5
+        )
+
+    glow.BackgroundColor3 =
+        ORB_GLOW_COLOR
+
+    glow.BackgroundTransparency =
+        0.82
+
+    glow.BorderSizePixel =
+        0
+
+    glow.ZIndex =
+        19
+
+    NewCorner(
+        glow,
+        1
+    )
+
+    glow.Parent =
+        orb
+
+    orb.Parent =
+        AnimationGui
+
+    return orb,stroke,glow
+end
 
 --------------------------------------------------
--- CREATE EXPLOSION PART
+-- CREATE 7 ORBS
 --------------------------------------------------
 
-local function CreateExplosionPart()
+local Orbs = {}
+
+for i = 1,ORB_COUNT do
+
+    local orb,stroke,glow =
+        CreateOrb()
+
+    local randomX =
+        math.random(
+            80,
+            math.max(
+                81,
+                math.floor(Viewport.X - 80)
+            )
+        )
+
+    local randomY =
+        math.random(
+            80,
+            math.max(
+                81,
+                math.floor(Viewport.Y - 80)
+            )
+        )
+
+    orb.Position =
+        UDim2.new(
+            0,
+            randomX,
+            0,
+            randomY
+        )
+
+    table.insert(
+        Orbs,
+        {
+            Object = orb,
+            Stroke = stroke,
+            Glow = glow,
+            Index = i
+        }
+    )
+end
+
+--------------------------------------------------
+-- GATHER TO CIRCLE
+--------------------------------------------------
+
+local CirclePositions = {}
+
+for i = 1,ORB_COUNT do
+
+    local angle =
+        ((i - 1) / ORB_COUNT)
+        * math.pi
+        * 2
+
+    local x =
+        CenterX
+        + math.cos(angle)
+        * ORBIT_RADIUS
+
+    local y =
+        CenterY
+        + math.sin(angle)
+        * ORBIT_RADIUS
+
+    CirclePositions[i] =
+        Vector2.new(
+            x,
+            y
+        )
+end
+
+for _,data in ipairs(Orbs) do
+
+    local target =
+        CirclePositions[
+            data.Index
+        ]
+
+    Tween(
+        data.Object,
+        GATHER_TIME,
+        {
+            Position =
+                UDim2.new(
+                    0,
+                    target.X,
+                    0,
+                    target.Y
+                )
+        },
+        Enum.EasingStyle.Quart,
+        Enum.EasingDirection.Out
+    )
+end
+
+task.wait(GATHER_TIME)
+
+--------------------------------------------------
+-- SLOW CIRCLE ROTATION
+--------------------------------------------------
+
+local OrbitStart =
+    tick()
+
+while tick() - OrbitStart < ORBIT_TIME do
+
+    local elapsed =
+        tick() - OrbitStart
+
+    local rotation =
+        elapsed
+        * ORBIT_SPEED
+
+    for _,data in ipairs(Orbs) do
+
+        if data.Object.Parent then
+
+            local baseAngle =
+                ((data.Index - 1) / ORB_COUNT)
+                * math.pi
+                * 2
+
+            local angle =
+                baseAngle
+                + rotation
+
+            local x =
+                CenterX
+                + math.cos(angle)
+                * ORBIT_RADIUS
+
+            local y =
+                CenterY
+                + math.sin(angle)
+                * ORBIT_RADIUS
+
+            data.Object.Position =
+                UDim2.new(
+                    0,
+                    x,
+                    0,
+                    y
+                )
+        end
+    end
+
+    RunService.RenderStepped:Wait()
+end
+
+--------------------------------------------------
+-- BLINK 7 TIMES
+--------------------------------------------------
+
+for blink = 1,BLINK_COUNT do
+
+    for _,data in ipairs(Orbs) do
+
+        if data.Stroke then
+            data.Stroke.Transparency = 0
+            data.Stroke.Thickness = 4
+        end
+
+        if data.Glow then
+            data.Glow.BackgroundTransparency = 0.55
+        end
+    end
+
+    task.wait(BLINK_ON_TIME)
+
+    for _,data in ipairs(Orbs) do
+
+        if data.Stroke then
+            data.Stroke.Transparency = 0.8
+            data.Stroke.Thickness = 2
+        end
+
+        if data.Glow then
+            data.Glow.BackgroundTransparency = 0.9
+        end
+    end
+
+    task.wait(BLINK_OFF_TIME)
+end
+
+--------------------------------------------------
+-- MERGE INTO LARGE CORE
+--------------------------------------------------
+
+for _,data in ipairs(Orbs) do
+
+    Tween(
+        data.Object,
+        CORE_GROW_TIME,
+        {
+            Position =
+                UDim2.new(
+                    0,
+                    CenterX,
+                    0,
+                    CenterY
+                ),
+            Size =
+                UDim2.new(
+                    0,
+                    42,
+                    0,
+                    42
+                )
+        },
+        Enum.EasingStyle.Quad,
+        Enum.EasingDirection.In
+    )
+end
+
+task.wait(CORE_GROW_TIME)
+
+--------------------------------------------------
+-- REMOVE ORBS
+--------------------------------------------------
+
+for _,data in ipairs(Orbs) do
+
+    pcall(function()
+        data.Object:Destroy()
+    end)
+
+end
+
+--------------------------------------------------
+-- EXPLOSION
+--------------------------------------------------
+
+local ExplosionParts = {}
+
+for i = 1,EXPLOSION_COUNT do
 
     local part =
         Instance.new("Frame")
 
+    part.Name =
+        "ExplosionPart"
+
     local size =
         math.random(
-            9,
-            17
+            8,
+            15
         )
 
     part.Size =
-        UDim2.fromOffset(
+        UDim2.new(
+            0,
             size,
+            0,
             size
         )
 
@@ -812,85 +616,41 @@ local function CreateExplosionPart()
         )
 
     part.Position =
-        UDim2.fromOffset(
-            Center.X,
-            Center.Y
+        UDim2.new(
+            0,
+            CenterX,
+            0,
+            CenterY
         )
 
     part.BackgroundColor3 =
-        PURPLE
+        ORB_COLOR
 
     part.BorderSizePixel =
         0
 
     part.ZIndex =
-        20
+        25
 
-    part.Rotation =
-        math.random(
-            0,
-            360
-        )
+    NewCorner(
+        part,
+        1
+    )
+
+    NewStroke(
+        part,
+        ORB_GLOW_COLOR,
+        2,
+        0.15
+    )
 
     part.Parent =
         AnimationGui
 
-    local corner =
-        Instance.new("UICorner")
-
-    corner.CornerRadius =
-        UDim.new(
-            0.35,
-            0
-        )
-
-    corner.Parent =
-        part
-
-    local stroke =
-        Instance.new("UIStroke")
-
-    stroke.Color =
-        GOLD
-
-    stroke.Thickness =
-        1.5
-
-    stroke.Transparency =
-        0.1
-
-    stroke.Parent =
-        part
-
-    return part
-end
-
---------------------------------------------------
--- EXPLOSION
---------------------------------------------------
-
-local ExplosionParts = {}
-
-for i = 1, EXPLOSION_PARTS do
-
-    local part =
-        CreateExplosionPart()
-
     local angle =
-        (
-            math.pi * 2
-            / EXPLOSION_PARTS
-        )
-        * i
-
-    angle =
-        angle
-        + math.rad(
-            math.random(
-                -20,
-                20
-            )
-        )
+        math.random()
+        * math.pi
+        * 2
 
     local distance =
         math.random(
@@ -901,300 +661,183 @@ for i = 1, EXPLOSION_PARTS do
         )
 
     local targetX =
-        Center.X
+        CenterX
         + math.cos(angle)
         * distance
 
     local targetY =
-        Center.Y
+        CenterY
         + math.sin(angle)
         * distance
-
-    local targetRotation =
-        math.random(
-            -180,
-            180
-        )
 
     table.insert(
         ExplosionParts,
         part
     )
 
-    TweenService:Create(
+    Tween(
         part,
-        TweenInfo.new(
-            EXPLOSION_TIME,
-            Enum.EasingStyle.Quint,
-            Enum.EasingDirection.Out
-        ),
+        EXPLOSION_SPEED
+            + math.random() * 0.25,
         {
             Position =
-                UDim2.fromOffset(
+                UDim2.new(
+                    0,
                     targetX,
+                    0,
                     targetY
                 ),
-
-            Rotation =
-                targetRotation,
-
             BackgroundTransparency =
-                0.15
-        }
-    ):Play()
-
-    task.spawn(
-        function()
-
-            task.wait(
-                EXPLOSION_TIME * 0.55
-            )
-
-            TweenService:Create(
-                part,
-                TweenInfo.new(
-                    EXPLOSION_TIME * 0.45,
-                    Enum.EasingStyle.Sine,
-                    Enum.EasingDirection.Out
-                ),
-                {
-                    BackgroundTransparency =
-                        1
-                }
-            ):Play()
-
-            local stroke =
-                part:FindFirstChildOfClass(
-                    "UIStroke"
-                )
-
-            if stroke then
-
-                TweenService:Create(
-                    stroke,
-                    TweenInfo.new(
-                        EXPLOSION_TIME * 0.45,
-                        Enum.EasingStyle.Sine,
-                        Enum.EasingDirection.Out
-                    ),
-                    {
-                        Transparency = 1
-                    }
-                ):Play()
-            end
-
-            task.wait(
-                EXPLOSION_TIME * 0.45
-                + 0.05
-            )
-
-            pcall(function()
-                part:Destroy()
-            end)
-        end
+                1
+        },
+        Enum.EasingStyle.Quad,
+        Enum.EasingDirection.Out
     )
+
 end
 
 --------------------------------------------------
--- BIG BALL DISAPPEARS
+-- CREATE FAKE HUB BUTTON
 --------------------------------------------------
 
-TweenService:Create(
-    BigBall.Holder,
-    TweenInfo.new(
-        0.25,
-        Enum.EasingStyle.Quad,
-        Enum.EasingDirection.In
-    ),
-    {
-        Size =
-            UDim2.fromOffset(
-                5,
-                5
-            ),
+local FakeHubButton =
+    Instance.new("TextButton")
 
-        BackgroundTransparency =
-            1
-    }
-):Play()
+FakeHubButton.Name =
+    "HubButtonFake"
 
-TweenService:Create(
-    BigBall.Glow,
-    TweenInfo.new(
-        0.25,
-        Enum.EasingStyle.Quad,
-        Enum.EasingDirection.In
-    ),
-    {
-        Transparency = 1
-    }
-):Play()
+FakeHubButton.Size =
+    OriginalSize
 
-TweenService:Create(
-    BigBall.Star,
-    TweenInfo.new(
-        0.25,
-        Enum.EasingStyle.Quad,
-        Enum.EasingDirection.In
-    ),
-    {
-        TextTransparency = 1
-    }
-):Play()
+FakeHubButton.AnchorPoint =
+    OriginalAnchorPoint
 
-task.wait(
-    0.28
+FakeHubButton.Position =
+    UDim2.new(
+        0,
+        CenterX,
+        0,
+        CenterY
+    )
+
+FakeHubButton.Rotation =
+    OriginalRotation
+
+FakeHubButton.BackgroundColor3 =
+    HubButton.BackgroundColor3
+
+FakeHubButton.BackgroundTransparency =
+    HubButton.BackgroundTransparency
+
+FakeHubButton.BorderSizePixel =
+    HubButton.BorderSizePixel
+
+FakeHubButton.Text =
+    HubButton.Text
+
+FakeHubButton.TextColor3 =
+    HubButton.TextColor3
+
+FakeHubButton.TextStrokeTransparency =
+    HubButton.TextStrokeTransparency
+
+FakeHubButton.TextSize =
+    HubButton.TextSize
+
+FakeHubButton.Font =
+    HubButton.Font
+
+FakeHubButton.AutoButtonColor =
+    false
+
+FakeHubButton.ZIndex =
+    50
+
+NewCorner(
+    FakeHubButton,
+    1
 )
 
+local FakeStroke =
+    NewStroke(
+        FakeHubButton,
+        Color3.fromRGB(
+            255,
+            255,
+            255
+        ),
+        2.5,
+        0.05
+    )
+
+FakeHubButton.Parent =
+    AnimationGui
+
+--------------------------------------------------
+-- FAKE BUTTON APPEAR
+--------------------------------------------------
+
+FakeHubButton.Size =
+    UDim2.new(
+        0,
+        0,
+        0,
+        0
+    )
+
+Tween(
+    FakeHubButton,
+    0.35,
+    {
+        Size =
+            OriginalSize
+    },
+    Enum.EasingStyle.Back,
+    Enum.EasingDirection.Out
+)
+
+task.wait(0.4)
+
+--------------------------------------------------
+-- FAKE BUTTON FLIGHT TO ORIGINAL POSITION
+--------------------------------------------------
+
+local FlyTween =
+    Tween(
+        FakeHubButton,
+        FAKE_BUTTON_TIME,
+        {
+            Position =
+                OriginalPosition,
+            Rotation =
+                OriginalRotation
+        },
+        Enum.EasingStyle.Quart,
+        Enum.EasingDirection.InOut
+    )
+
+FlyTween.Completed:Wait()
+
+--------------------------------------------------
+-- REMOVE FAKE BUTTON
+--------------------------------------------------
+
 pcall(function()
-    BigBall.Holder:Destroy()
+    FakeHubButton:Destroy()
 end)
 
 --------------------------------------------------
--- HUB BUTTON APPEARS AT CENTER
---------------------------------------------------
-
-local hubSize =
-    HubButton.AbsoluteSize
-
-if hubSize.X <= 0
-    or hubSize.Y <= 0 then
-
-    hubSize =
-        Vector2.new(
-            45,
-            45
-        )
-end
-
---------------------------------------------------
--- CALCULATE CENTER POSITION
--- WITHOUT CHANGING ANCHORPOINT
---------------------------------------------------
-
-local centerHubX =
-    Center.X
-    - (
-        hubSize.X
-        * OriginalAnchorPoint.X
-    )
-
-local centerHubY =
-    Center.Y
-    - (
-        hubSize.Y
-        * OriginalAnchorPoint.Y
-    )
-
---------------------------------------------------
--- SHOW REAL HUB BUTTON
---------------------------------------------------
-
-HubButton.Visible =
-    true
-
-HubButton.Size =
-    OriginalSize
-
-HubButton.AnchorPoint =
-    OriginalAnchorPoint
-
-HubButton.Rotation =
-    OriginalRotation
-
-HubButton.ZIndex =
-    OriginalZIndex
-
-HubButton.Position =
-    UDim2.fromOffset(
-        centerHubX,
-        centerHubY
-    )
-
---------------------------------------------------
--- HUB APPEAR SCALE EFFECT
---------------------------------------------------
-
-local HubScale =
-    HubButton:FindFirstChild(
-        "LoadAnimationScale"
-    )
-
-if HubScale then
-    pcall(function()
-        HubScale:Destroy()
-    end)
-end
-
-HubScale =
-    Instance.new("UIScale")
-
-HubScale.Name =
-    "LoadAnimationScale"
-
-HubScale.Scale =
-    0.35
-
-HubScale.Parent =
-    HubButton
-
-TweenService:Create(
-    HubScale,
-    TweenInfo.new(
-        0.35,
-        Enum.EasingStyle.Back,
-        Enum.EasingDirection.Out
-    ),
-    {
-        Scale = 1
-    }
-):Play()
-
-task.wait(
-    0.3
-)
-
---------------------------------------------------
--- SAVE CENTER POSITION
---------------------------------------------------
-
-local CenterHubPosition =
-    HubButton.Position
-
---------------------------------------------------
--- FLY TO ORIGINAL POSITION
---------------------------------------------------
-
-local hubMove =
-    TweenService:Create(
-        HubButton,
-        TweenInfo.new(
-            HUB_MOVE_TIME,
-            Enum.EasingStyle.Quint,
-            Enum.EasingDirection.Out
-        ),
-        {
-            Position =
-                OriginalPosition
-        }
-    )
-
-hubMove:Play()
-
-hubMove.Completed:Wait()
-
---------------------------------------------------
--- RESTORE EXACT ORIGINAL STATE
+-- RESTORE REAL HUB BUTTON
 --------------------------------------------------
 
 HubButton.Position =
     OriginalPosition
 
-HubButton.AnchorPoint =
-    OriginalAnchorPoint
-
 HubButton.Size =
     OriginalSize
+
+HubButton.AnchorPoint =
+    OriginalAnchorPoint
 
 HubButton.Rotation =
     OriginalRotation
@@ -1203,33 +846,22 @@ HubButton.ZIndex =
     OriginalZIndex
 
 HubButton.Visible =
-    true
+    OriginalVisible
 
 --------------------------------------------------
--- REMOVE TEMP SCALE
+-- CLEAN EXPLOSION
 --------------------------------------------------
 
-if HubScale then
-
-    TweenService:Create(
-        HubScale,
-        TweenInfo.new(
-            0.12,
-            Enum.EasingStyle.Sine,
-            Enum.EasingDirection.Out
-        ),
-        {
-            Scale = 1
-        }
-    ):Play()
-
-    task.wait(
-        0.12
-    )
+for _,part in ipairs(
+    ExplosionParts
+) do
 
     pcall(function()
-        HubScale:Destroy()
+        if part.Parent then
+            part:Destroy()
+        end
     end)
+
 end
 
 --------------------------------------------------
@@ -1239,29 +871,3 @@ end
 pcall(function()
     AnimationGui:Destroy()
 end)
-
---------------------------------------------------
--- FINAL SAFETY
---------------------------------------------------
-
-if HubButton
-    and HubButton.Parent then
-
-    HubButton.Visible =
-        true
-
-    HubButton.Position =
-        OriginalPosition
-
-    HubButton.AnchorPoint =
-        OriginalAnchorPoint
-
-    HubButton.Size =
-        OriginalSize
-
-    HubButton.Rotation =
-        OriginalRotation
-
-    HubButton.ZIndex =
-        OriginalZIndex
-end
