@@ -1,9 +1,14 @@
+--// CustomHub LoadScriptAnimation.lua
+--// 7 Purple Dragon Balls + Red Stars
+--// Slow Center Formation + Slow Rotation + Gentle Explosion
+--// HubButton appears at center and slowly returns to original position
+
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 --------------------------------------------------
--- CONFIG                                                       
+-- CONFIG
 --------------------------------------------------
 
 local ANIMATION_GUI_NAME = "CustomHub_LoadAnimation"
