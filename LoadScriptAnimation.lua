@@ -1,4 +1,3 @@
-```lua
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 
@@ -622,4 +621,3 @@ task.delay(
 
 _G.CustomHubLoadAnimationFinished =
     true
-```
