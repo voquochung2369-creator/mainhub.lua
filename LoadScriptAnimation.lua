@@ -1,3 +1,9 @@
+```lua
+--// CustomHub LoadScriptAnimation.lua
+--// 7 Purple Dragon Balls + Red Stars
+--// Slow Center Formation + Slow Rotation + Gentle Explosion
+--// HubButton appears at center and slowly returns to original position
+
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -6,102 +12,98 @@ local RunService = game:GetService("RunService")
 -- CONFIG
 --------------------------------------------------
 
-local GUI_NAME = "CustomHub_LoadScriptAnimation"
+local ANIMATION_GUI_NAME = "CustomHub_LoadAnimation"
 
 local BALL_COUNT = 7
+local BALL_SIZE = 30
 
-local BALL_SIZE = 15
+local BALL_COLOR = Color3.fromRGB(145, 65, 220)
+local BALL_STROKE_COLOR = Color3.fromRGB(210, 130, 255)
+local STAR_COLOR = Color3.fromRGB(255, 45, 45)
 
-local BALL_COLOR = Color3.fromRGB(
-    255,
-    205,
-    45
-)
+local CENTER_RADIUS = 65
+local MOVE_TIME = 1.6
 
-local BALL_INNER_COLOR = Color3.fromRGB(
-    255,
-    220,
-    80
-)
-
-local STROKE_COLOR = Color3.fromRGB(
-    255,
-    235,
-    100
-)
-
-local FORMATION_RADIUS = 23
-
-local RANDOM_DISTANCE_MIN = 120
-local RANDOM_DISTANCE_MAX = 300
-
-local MOVE_TIME_MIN = 0.65
-local MOVE_TIME_MAX = 1.05
+local ROTATE_TIME = 2.8
+local ROTATE_LOOPS = 2
 
 local BLINK_COUNT = 7
 local BLINK_TIME = 0.2
-local AFTER_BLINK_DELAY = 0.3
+local BLINK_OFF_TIME = 0.3
 
-local EXPLOSION_PARTS = 55
-local EXPLOSION_DISTANCE_MIN = 25
-local EXPLOSION_DISTANCE_MAX = 90
+local EXPLOSION_TIME = 1.2
+local EXPLOSION_DISTANCE = 45
+local FRAGMENT_COUNT = 28
 
-local EXPLOSION_TIME_MIN = 0.8
-local EXPLOSION_TIME_MAX = 1.35
+local HUB_MOVE_TIME = 1.5
 
 --------------------------------------------------
 -- REMOVE OLD ANIMATION
 --------------------------------------------------
 
-local oldGui = CoreGui:FindFirstChild(GUI_NAME)
+local oldAnimation =
+    CoreGui:FindFirstChild(
+        ANIMATION_GUI_NAME
+    )
 
-if oldGui then
+if oldAnimation then
     pcall(function()
-        oldGui:Destroy()
+        oldAnimation:Destroy()
     end)
-
-    task.wait()
 end
 
 --------------------------------------------------
 -- FIND HUB UI
 --------------------------------------------------
 
-local HubUi = CoreGui:FindFirstChild("HubUi")
+local HubUi =
+    CoreGui:FindFirstChild(
+        "HubUi"
+    )
 
 if not HubUi then
-    warn("[CustomHub] Không tìm thấy HubUi")
+    warn(
+        "[CustomHub] Không tìm thấy HubUi"
+    )
     return
 end
 
-local HubButton = HubUi:FindFirstChild("HubButton")
+local HubButton =
+    HubUi:FindFirstChild(
+        "HubButton"
+    )
 
 if not HubButton then
-    warn("[CustomHub] Không tìm thấy HubButton")
+    warn(
+        "[CustomHub] Không tìm thấy HubButton"
+    )
     return
 end
 
 --------------------------------------------------
--- GET HUB BUTTON POSITION
+-- SAVE ORIGINAL POSITION
 --------------------------------------------------
 
-local HubPosition = HubButton.AbsolutePosition
+local OriginalPosition =
+    HubButton.Position
 
-local HubSize = HubButton.AbsoluteSize
+local OriginalSize =
+    HubButton.Size
 
-local HubCenter = HubPosition + (
-    HubSize / 2
-)
+local OriginalVisible =
+    HubButton.Visible
 
 --------------------------------------------------
--- CREATE ANIMATION GUI
+-- SCREEN
 --------------------------------------------------
 
 local AnimationGui =
-    Instance.new("ScreenGui")
+    Instance.new(
+        "ScreenGui"
+    )
 
 AnimationGui.Name =
-    GUI_NAME
+    ANIMATION_GUI_NAME
 
 AnimationGui.ResetOnSpawn =
     false
@@ -110,7 +112,7 @@ AnimationGui.IgnoreGuiInset =
     true
 
 AnimationGui.ZIndexBehavior =
-    Enum.ZIndexBehavior.Global
+    Enum.ZIndexBehavior.Sibling
 
 AnimationGui.DisplayOrder =
     999999
@@ -119,91 +121,38 @@ AnimationGui.Parent =
     CoreGui
 
 --------------------------------------------------
--- HIDE HUB BUTTON
+-- GET CENTER
 --------------------------------------------------
 
-local OldHubTransparency = {}
+local Camera =
+    workspace.CurrentCamera
 
-OldHubTransparency.BackgroundTransparency =
-    HubButton.BackgroundTransparency
-
-OldHubTransparency.TextTransparency =
-    HubButton.TextTransparency
-
-OldHubTransparency.TextStrokeTransparency =
-    HubButton.TextStrokeTransparency
-
-HubButton.BackgroundTransparency = 1
-HubButton.TextTransparency = 1
-HubButton.TextStrokeTransparency = 1
-
-for _, child in ipairs(
-    HubButton:GetChildren()
-) do
-
-    if child:IsA("UIStroke") then
-        child.Transparency = 1
-    elseif child:IsA("GuiObject") then
-        child.Visible = false
-    end
+if not Camera then
+    AnimationGui:Destroy()
+    return
 end
 
---------------------------------------------------
--- HELPERS
---------------------------------------------------
+local function GetCenter()
 
-local function RandomScreenPosition()
-
-    local Camera =
-        workspace.CurrentCamera
-
-    local ViewportSize =
-        Camera
-        and Camera.ViewportSize
-        or Vector2.new(
-            1920,
-            1080
-        )
-
-    local margin = 80
-
-    local x =
-        math.random(
-            margin,
-            math.max(
-                margin,
-                math.floor(
-                    ViewportSize.X - margin
-                )
-            )
-        )
-
-    local y =
-        math.random(
-            margin,
-            math.max(
-                margin,
-                math.floor(
-                    ViewportSize.Y - margin
-                )
-            )
-        )
+    local viewport =
+        Camera.ViewportSize
 
     return Vector2.new(
-        x,
-        y
+        viewport.X / 2,
+        viewport.Y / 2
     )
 end
 
-local function CreateBall(
-    position
-)
+--------------------------------------------------
+-- CREATE BALL
+--------------------------------------------------
+
+local function CreateBall()
 
     local ball =
-        Instance.new("Frame")
-
-    ball.Name =
-        "DragonBall"
+        Instance.new(
+            "Frame"
+        )
 
     ball.Size =
         UDim2.new(
@@ -213,35 +162,31 @@ local function CreateBall(
             BALL_SIZE
         )
 
-    ball.Position =
-        UDim2.fromOffset(
-            position.X - BALL_SIZE / 2,
-            position.Y - BALL_SIZE / 2
-        )
-
     ball.AnchorPoint =
         Vector2.new(
-            0,
-            0
+            0.5,
+            0.5
         )
 
     ball.BackgroundColor3 =
         BALL_COLOR
 
     ball.BackgroundTransparency =
-        0.02
+        0.05
 
     ball.BorderSizePixel =
         0
 
     ball.ZIndex =
-        20
+        10
 
     ball.Parent =
         AnimationGui
 
     local corner =
-        Instance.new("UICorner")
+        Instance.new(
+            "UICorner"
+        )
 
     corner.CornerRadius =
         UDim.new(
@@ -253,73 +198,121 @@ local function CreateBall(
         ball
 
     local stroke =
-        Instance.new("UIStroke")
+        Instance.new(
+            "UIStroke"
+        )
 
     stroke.Name =
-        "BallStroke"
+        "GlowStroke"
 
     stroke.Color =
-        STROKE_COLOR
+        BALL_STROKE_COLOR
 
     stroke.Thickness =
-        1.5
+        2
 
     stroke.Transparency =
-        0.35
+        0.15
 
     stroke.Parent =
         ball
 
-    local inner =
-        Instance.new("Frame")
+    --------------------------------------------------
+    -- RED STAR
+    --------------------------------------------------
 
-    inner.Name =
-        "Inner"
-
-    inner.Size =
-        UDim2.new(
-            0,
-            5,
-            0,
-            5
+    local star =
+        Instance.new(
+            "TextLabel"
         )
 
-    inner.Position =
-        UDim2.new(
-            0.5,
-            -2.5,
-            0.5,
-            -2.5
-        )
+    star.Name =
+        "RedStar"
 
-    inner.BackgroundColor3 =
-        BALL_INNER_COLOR
-
-    inner.BackgroundTransparency =
-        0.2
-
-    inner.BorderSizePixel =
-        0
-
-    inner.ZIndex =
-        21
-
-    inner.Parent =
+    star.Parent =
         ball
 
-    local innerCorner =
-        Instance.new("UICorner")
-
-    innerCorner.CornerRadius =
-        UDim.new(
+    star.Size =
+        UDim2.new(
+            1,
+            0,
             1,
             0
         )
 
-    innerCorner.Parent =
-        inner
+    star.Position =
+        UDim2.new(
+            0,
+            0,
+            0,
+            0
+        )
 
-    return ball
+    star.BackgroundTransparency =
+        1
+
+    star.Text =
+        "★"
+
+    star.TextColor3 =
+        STAR_COLOR
+
+    star.TextStrokeColor3 =
+        Color3.fromRGB(
+            80,
+            0,
+            0
+        )
+
+    star.TextStrokeTransparency =
+        0.15
+
+    star.TextScaled =
+        true
+
+    star.Font =
+        Enum.Font.GothamBold
+
+    star.ZIndex =
+        11
+
+    return ball, stroke
+end
+
+--------------------------------------------------
+-- RANDOM POSITION
+--------------------------------------------------
+
+local function RandomPosition()
+
+    local viewport =
+        Camera.ViewportSize
+
+    local margin =
+        80
+
+    local x =
+        math.random(
+            margin,
+            math.max(
+                margin + 1,
+                viewport.X - margin
+            )
+        )
+
+    local y =
+        math.random(
+            margin,
+            math.max(
+                margin + 1,
+                viewport.Y - margin
+            )
+        )
+
+    return UDim2.fromOffset(
+        x,
+        y
+    )
 end
 
 --------------------------------------------------
@@ -327,284 +320,279 @@ end
 --------------------------------------------------
 
 local Balls = {}
+local Strokes = {}
 
 for i = 1, BALL_COUNT do
 
-    local startPosition =
-        RandomScreenPosition()
+    local ball, stroke =
+        CreateBall()
 
-    local ball =
-        CreateBall(
-            startPosition
-        )
+    ball.Position =
+        RandomPosition()
 
     table.insert(
         Balls,
         ball
     )
+
+    table.insert(
+        Strokes,
+        stroke
+    )
 end
 
 --------------------------------------------------
--- DRAGON BALL FORMATION
+-- HIDE HUB BUTTON
 --------------------------------------------------
 
-local FormationPositions = {}
-
-for i = 1, BALL_COUNT do
-
-    local angle =
-        math.rad(
-            -90
-            + (
-                (i - 1)
-                * (360 / BALL_COUNT)
-            )
-        )
-
-    local x =
-        HubCenter.X
-        + math.cos(angle)
-        * FORMATION_RADIUS
-
-    local y =
-        HubCenter.Y
-        + math.sin(angle)
-        * FORMATION_RADIUS
-
-    FormationPositions[i] =
-        Vector2.new(
-            x,
-            y
-        )
-end
+HubButton.Visible =
+    false
 
 --------------------------------------------------
--- MOVE BALLS
+-- MOVE TO CENTER
 --------------------------------------------------
 
-local MoveTweens = {}
+local center =
+    GetCenter()
+
+local moveTweenInfo =
+    TweenInfo.new(
+        MOVE_TIME,
+        Enum.EasingStyle.Quart,
+        Enum.EasingDirection.Out
+    )
 
 for i, ball in ipairs(Balls) do
 
-    local target =
-        FormationPositions[i]
+    local angle =
+        ((i - 1) / BALL_COUNT)
+        * math.pi
+        * 2
 
-    local targetPosition =
-        UDim2.fromOffset(
-            target.X - BALL_SIZE / 2,
-            target.Y - BALL_SIZE / 2
-        )
+    local targetX =
+        center.X
+        + math.cos(angle)
+        * CENTER_RADIUS
 
-    local moveTime =
-        MOVE_TIME_MIN
-        + math.random()
-        * (
-            MOVE_TIME_MAX
-            - MOVE_TIME_MIN
-        )
+    local targetY =
+        center.Y
+        + math.sin(angle)
+        * CENTER_RADIUS
 
     local tween =
         TweenService:Create(
             ball,
-            TweenInfo.new(
-                moveTime,
-                Enum.EasingStyle.Quart,
-                Enum.EasingDirection.Out
-            ),
+            moveTweenInfo,
             {
                 Position =
-                    targetPosition
+                    UDim2.fromOffset(
+                        targetX,
+                        targetY
+                    )
             }
         )
-
-    table.insert(
-        MoveTweens,
-        tween
-    )
 
     tween:Play()
 end
 
---------------------------------------------------
--- WAIT FOR FORMATION
---------------------------------------------------
-
-local longestMove =
-    MOVE_TIME_MAX
-
 task.wait(
-    longestMove + 0.05
+    MOVE_TIME
 )
 
 --------------------------------------------------
--- BLINK BORDER
+-- DRAGON BALL CIRCLE
 --------------------------------------------------
 
-local function SetBallStroke(
-    transparency,
-    thickness
-)
-
-    for _, ball in ipairs(Balls) do
-
-        if ball
-            and ball.Parent then
-
-            local stroke =
-                ball:FindFirstChild(
-                    "BallStroke"
-                )
-
-            if stroke then
-
-                stroke.Transparency =
-                    transparency
-
-                stroke.Thickness =
-                    thickness
-            end
-        end
-    end
-end
-
---------------------------------------------------
--- BLINK 7 TIMES
---------------------------------------------------
-
-for i = 1, BLINK_COUNT do
-
-    SetBallStroke(
-        0,
-        3
-    )
-
-    task.wait(
-        BLINK_TIME
-    )
-
-    SetBallStroke(
-        1,
-        1.5
-    )
-
-    task.wait(
-        BLINK_TIME
-    )
-end
-
---------------------------------------------------
--- OFF 0.3 SECOND
---------------------------------------------------
-
-SetBallStroke(
-    1,
-    1
-)
-
-task.wait(
-    AFTER_BLINK_DELAY
-)
-
---------------------------------------------------
--- SHOW HUB BUTTON
---------------------------------------------------
-
-HubButton.BackgroundTransparency =
-    OldHubTransparency.BackgroundTransparency
-
-HubButton.TextTransparency =
-    OldHubTransparency.TextTransparency
-
-HubButton.TextStrokeTransparency =
-    OldHubTransparency.TextStrokeTransparency
-
-for _, child in ipairs(
-    HubButton:GetChildren()
-) do
-
-    if child:IsA("UIStroke") then
-
-        if child.Name ==
-            "HubCircleStroke" then
-
-            child.Transparency =
-                0.45
-
-        end
-
-    elseif child:IsA("GuiObject") then
-
-        child.Visible =
-            true
-
-    end
-end
-
---------------------------------------------------
--- EXPLOSION
---------------------------------------------------
-
-local ExplosionContainer =
-    Instance.new("Frame")
-
-ExplosionContainer.Name =
-    "ExplosionContainer"
-
-ExplosionContainer.Size =
-    UDim2.new(
-        1,
-        0,
-        1,
-        0
-    )
-
-ExplosionContainer.Position =
-    UDim2.new(
-        0,
-        0,
-        0,
-        0
-    )
-
-ExplosionContainer.BackgroundTransparency =
-    1
-
-ExplosionContainer.BorderSizePixel =
+local currentRotation =
     0
 
-ExplosionContainer.ZIndex =
-    30
+local rotateConnection
 
-ExplosionContainer.Parent =
-    AnimationGui
+local rotateStart =
+    os.clock()
 
---------------------------------------------------
--- DESTROY ORIGINAL BALLS
---------------------------------------------------
+local rotateDuration =
+    ROTATE_TIME
+    * ROTATE_LOOPS
 
-for _, ball in ipairs(Balls) do
+rotateConnection =
+    RunService.RenderStepped:Connect(
+        function()
 
-    if ball
-        and ball.Parent then
+            if not AnimationGui.Parent then
+                return
+            end
 
-        ball:Destroy()
+            local elapsed =
+                os.clock()
+                - rotateStart
 
-    end
+            local progress =
+                math.clamp(
+                    elapsed
+                    / rotateDuration,
+                    0,
+                    1
+                )
+
+            currentRotation =
+                progress
+                * math.pi
+                * 2
+                * ROTATE_LOOPS
+
+            local currentCenter =
+                GetCenter()
+
+            for i, ball in ipairs(Balls) do
+
+                if ball.Parent then
+
+                    local angle =
+                        ((i - 1)
+                        / BALL_COUNT)
+                        * math.pi
+                        * 2
+                        + currentRotation
+
+                    local x =
+                        currentCenter.X
+                        + math.cos(angle)
+                        * CENTER_RADIUS
+
+                    local y =
+                        currentCenter.Y
+                        + math.sin(angle)
+                        * CENTER_RADIUS
+
+                    ball.Position =
+                        UDim2.fromOffset(
+                            x,
+                            y
+                        )
+
+                    ball.Rotation =
+                        math.deg(
+                            currentRotation
+                        )
+                end
+            end
+        end
+    )
+
+task.wait(
+    rotateDuration
+)
+
+if rotateConnection then
+    rotateConnection:Disconnect()
 end
 
 --------------------------------------------------
--- CREATE SLOW EXPLOSION
+-- RESET PERFECT CIRCLE
 --------------------------------------------------
 
-local ExplosionParts = {}
+center =
+    GetCenter()
 
-for i = 1, EXPLOSION_PARTS do
+for i, ball in ipairs(Balls) do
 
-    local particle =
-        Instance.new("Frame")
+    local angle =
+        ((i - 1) / BALL_COUNT)
+        * math.pi
+        * 2
 
-    particle.Name =
-        "ExplosionParticle"
+    ball.Position =
+        UDim2.fromOffset(
+            center.X
+            + math.cos(angle)
+            * CENTER_RADIUS,
+
+            center.Y
+            + math.sin(angle)
+            * CENTER_RADIUS
+        )
+
+    ball.Rotation =
+        0
+end
+
+--------------------------------------------------
+-- BORDER BLINK
+--------------------------------------------------
+
+for blink = 1, BLINK_COUNT do
+
+    for _, stroke in ipairs(
+        Strokes
+    ) do
+
+        if stroke.Parent then
+
+            local tween =
+                TweenService:Create(
+                    stroke,
+                    TweenInfo.new(
+                        BLINK_TIME,
+                        Enum.EasingStyle.Sine,
+                        Enum.EasingDirection.Out
+                    ),
+                    {
+                        Transparency = 0
+                    }
+                )
+
+            tween:Play()
+        end
+    end
+
+    task.wait(
+        BLINK_TIME
+    )
+
+    for _, stroke in ipairs(
+        Strokes
+    ) do
+
+        if stroke.Parent then
+
+            local tween =
+                TweenService:Create(
+                    stroke,
+                    TweenInfo.new(
+                        BLINK_TIME,
+                        Enum.EasingStyle.Sine,
+                        Enum.EasingDirection.In
+                    ),
+                    {
+                        Transparency = 0.85
+                    }
+                )
+
+            tween:Play()
+        end
+    end
+
+    task.wait(
+        BLINK_OFF_TIME
+    )
+end
+
+--------------------------------------------------
+-- GENTLE EXPLOSION
+--------------------------------------------------
+
+local explosionCenter =
+    GetCenter()
+
+local fragments = {}
+
+for i = 1, FRAGMENT_COUNT do
+
+    local fragment =
+        Instance.new(
+            "Frame"
+        )
 
     local size =
         math.random(
@@ -612,49 +600,54 @@ for i = 1, EXPLOSION_PARTS do
             5
         )
 
-    particle.Size =
-        UDim2.new(
-            0,
+    fragment.Size =
+        UDim2.fromOffset(
             size,
-            0,
             size
         )
 
-    particle.Position =
-        UDim2.fromOffset(
-            HubCenter.X - size / 2,
-            HubCenter.Y - size / 2
+    fragment.AnchorPoint =
+        Vector2.new(
+            0.5,
+            0.5
         )
 
-    particle.BackgroundColor3 =
-        BALL_COLOR
+    fragment.Position =
+        UDim2.fromOffset(
+            explosionCenter.X,
+            explosionCenter.Y
+        )
 
-    particle.BackgroundTransparency =
-        math.random(
-            0,
-            15
-        ) / 100
+    fragment.BackgroundColor3 =
+        if i % 2 == 0
+        then BALL_COLOR
+        else BALL_STROKE_COLOR
 
-    particle.BorderSizePixel =
+    fragment.BackgroundTransparency =
+        0.05
+
+    fragment.BorderSizePixel =
         0
 
-    particle.ZIndex =
-        31
+    fragment.ZIndex =
+        20
 
-    particle.Parent =
-        ExplosionContainer
+    fragment.Parent =
+        AnimationGui
 
-    local corner =
-        Instance.new("UICorner")
+    local fragmentCorner =
+        Instance.new(
+            "UICorner"
+        )
 
-    corner.CornerRadius =
+    fragmentCorner.CornerRadius =
         UDim.new(
             1,
             0
         )
 
-    corner.Parent =
-        particle
+    fragmentCorner.Parent =
+        fragment
 
     local angle =
         math.random()
@@ -662,59 +655,45 @@ for i = 1, EXPLOSION_PARTS do
         * 2
 
     local distance =
-        EXPLOSION_DISTANCE_MIN
-        + math.random()
-        * (
-            EXPLOSION_DISTANCE_MAX
-            - EXPLOSION_DISTANCE_MIN
+        math.random(
+            20,
+            EXPLOSION_DISTANCE
         )
 
     local targetX =
-        HubCenter.X
+        explosionCenter.X
         + math.cos(angle)
         * distance
 
     local targetY =
-        HubCenter.Y
+        explosionCenter.Y
         + math.sin(angle)
         * distance
 
     local targetSize =
-        math.random(
+        math.max(
             1,
-            3
-        )
-
-    local duration =
-        EXPLOSION_TIME_MIN
-        + math.random()
-        * (
-            EXPLOSION_TIME_MAX
-            - EXPLOSION_TIME_MIN
+            size * 0.45
         )
 
     local tween =
         TweenService:Create(
-            particle,
+            fragment,
             TweenInfo.new(
-                duration,
+                EXPLOSION_TIME,
                 Enum.EasingStyle.Quad,
                 Enum.EasingDirection.Out
             ),
             {
                 Position =
                     UDim2.fromOffset(
-                        targetX
-                        - targetSize / 2,
+                        targetX,
                         targetY
-                        - targetSize / 2
                     ),
 
                 Size =
-                    UDim2.new(
-                        0,
+                    UDim2.fromOffset(
                         targetSize,
-                        0,
                         targetSize
                     ),
 
@@ -724,95 +703,204 @@ for i = 1, EXPLOSION_PARTS do
         )
 
     table.insert(
-        ExplosionParts,
-        tween
+        fragments,
+        {
+            Object = fragment,
+            Tween = tween
+        }
     )
+end
+
+--------------------------------------------------
+-- HIDE BALLS
+--------------------------------------------------
+
+for _, ball in ipairs(Balls) do
+
+    local tween =
+        TweenService:Create(
+            ball,
+            TweenInfo.new(
+                0.25,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Size =
+                    UDim2.fromOffset(
+                        5,
+                        5
+                    ),
+
+                BackgroundTransparency =
+                    1
+            }
+        )
 
     tween:Play()
 end
 
 --------------------------------------------------
--- SOFT HUB BUTTON APPEAR
+-- START FRAGMENTS
+--------------------------------------------------
+
+for _, data in ipairs(
+    fragments
+) do
+
+    data.Tween:Play()
+end
+
+--------------------------------------------------
+-- HUB BUTTON AT CENTER
+--------------------------------------------------
+
+HubButton.AnchorPoint =
+    Vector2.new(
+        0.5,
+        0.5
+    )
+
+HubButton.Position =
+    UDim2.fromOffset(
+        explosionCenter.X,
+        explosionCenter.Y
+    )
+
+HubButton.Size =
+    OriginalSize
+
+HubButton.Visible =
+    true
+
+--------------------------------------------------
+-- HUB BUTTON APPEAR
 --------------------------------------------------
 
 HubButton.BackgroundTransparency =
     1
 
-HubButton.TextTransparency =
-    1
-
-for _, child in ipairs(
-    HubButton:GetChildren()
-) do
-
-    if child:IsA("GuiObject") then
-        child.Visible = true
-    end
-
-    if child:IsA("UIStroke")
-        and child.Name ==
-            "HubCircleStroke" then
-
-        child.Transparency =
-            1
-    end
-end
-
-local HubFade =
-    TweenService:Create(
-        HubButton,
-        TweenInfo.new(
-            0.35,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.Out
-        ),
-        {
-            BackgroundTransparency =
-                OldHubTransparency.BackgroundTransparency,
-
-            TextTransparency =
-                OldHubTransparency.TextTransparency
-        }
-    )
-
-HubFade:Play()
-
-local HubStroke =
+local hubStroke =
     HubButton:FindFirstChild(
         "HubCircleStroke"
     )
 
-if HubStroke then
+if hubStroke then
+    hubStroke.Transparency =
+        1
+end
 
+local hubAppear =
     TweenService:Create(
-        HubStroke,
+        HubButton,
         TweenInfo.new(
             0.35,
-            Enum.EasingStyle.Quad,
+            Enum.EasingStyle.Back,
             Enum.EasingDirection.Out
         ),
         {
-            Transparency =
-                OldHubTransparency.TextStrokeTransparency
-                or 0.45
+            BackgroundTransparency =
+                0.18
         }
-    ):Play()
+    )
 
+hubAppear:Play()
+
+if hubStroke then
+
+    local strokeAppear =
+        TweenService:Create(
+            hubStroke,
+            TweenInfo.new(
+                0.35,
+                Enum.EasingStyle.Sine,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Transparency =
+                    0.45
+            }
+        )
+
+    strokeAppear:Play()
 end
 
+task.wait(
+    0.35
+)
+
 --------------------------------------------------
--- WAIT EXPLOSION
+-- MOVE HUB BUTTON TO ORIGINAL POSITION
 --------------------------------------------------
 
+local hubMove =
+    TweenService:Create(
+        HubButton,
+        TweenInfo.new(
+            HUB_MOVE_TIME,
+            Enum.EasingStyle.Quart,
+            Enum.EasingDirection.Out
+        ),
+        {
+            Position =
+                OriginalPosition
+        }
+    )
+
+hubMove:Play()
+
 task.wait(
-    EXPLOSION_TIME_MAX
-    + 0.15
+    HUB_MOVE_TIME
 )
+
+--------------------------------------------------
+-- RESTORE HUB BUTTON
+--------------------------------------------------
+
+HubButton.AnchorPoint =
+    Vector2.new(
+        0,
+        0
+    )
+
+HubButton.Position =
+    OriginalPosition
+
+HubButton.Size =
+    OriginalSize
+
+HubButton.Visible =
+    OriginalVisible
+
+HubButton.BackgroundTransparency =
+    0.18
+
+if hubStroke then
+    hubStroke.Transparency =
+        0.45
+end
 
 --------------------------------------------------
 -- CLEANUP
 --------------------------------------------------
 
+for _, ball in ipairs(Balls) do
+
+    pcall(function()
+        ball:Destroy()
+    end)
+end
+
+for _, data in ipairs(
+    fragments
+) do
+
+    pcall(function()
+        data.Object:Destroy()
+    end)
+end
+
 pcall(function()
     AnimationGui:Destroy()
 end)
+```
