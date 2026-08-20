@@ -274,7 +274,7 @@ Bloxfruit:AddButton({
 ChildCallback = function(Enabled, Selected)
 
     if Enabled then
-        task.wait(0.3)
+        task.wait(1)
 
         local Player = game:GetService("Players").LocalPlayer
 
