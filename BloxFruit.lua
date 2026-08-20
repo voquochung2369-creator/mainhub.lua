@@ -88,6 +88,50 @@ Bloxfruit:AddButton({
         end
 })
 
+Bloxfruit:AddButton({
+    Name = "Auto Real Kid",
+    Click = "Lever",
+    Slot = 2,
+	Save = true,
+	Default = false,
+    Callback =
+        function()
+            local success, result =
+                pcall(
+                    function()
+
+                        local source =
+                            game:HttpGet(
+                                "https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/main.lua"
+                            )
+
+                        local fn =
+                            loadstring(
+                                source
+                            )
+
+                        if type(fn)
+                            ~= "function" then
+
+                            error(
+                                "Auto Real Kid load failed"
+                            )
+                        end
+
+                        return fn()
+                    end
+                )
+
+            if not success then
+
+                warn(
+                    "Real Kid error:",
+                    result
+                )
+            end
+        end
+})
+
 --------------------------------------------------
 -- ONION
 --------------------------------------------------
@@ -101,7 +145,7 @@ Bloxfruit:AddButton({
         "Button",
 
     Slot =
-        2,
+        3,
 
     Callback =
         function()
@@ -155,7 +199,7 @@ Bloxfruit:AddButton({
         "Button",
 
     Slot =
-        3,
+        4,
 
     Callback =
         function()
@@ -203,7 +247,7 @@ Bloxfruit:AddButton({
 Bloxfruit:AddButton({
     Name = "Auto Join Team",
     Click = "Scroll",
-    Slot = 4,
+    Slot = 5,
     Min = 0,
     Max = 1,
     Save = true,
