@@ -1008,7 +1008,7 @@ HubButton.ZIndex =
     OriginalZIndex
 
 HubButton.Visible =
-    OriginalVisible
+    true
 
 --------------------------------------------------
 -- CLEAN EXPLOSION
