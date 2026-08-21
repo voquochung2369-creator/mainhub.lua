@@ -35,7 +35,7 @@ ESP:AddButton({
     Slot = 1,
     Min = 0,
     Max = 1,
-    Save = false,
+    Save = true,
     Options = {
         {
             Name = "Player",
