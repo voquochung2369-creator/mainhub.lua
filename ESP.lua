@@ -35,7 +35,7 @@ ESP:AddButton({
     Slot = 1,
     Min = 0,
     Max = 1,
-    Save = true,
+    Save = false,
     Options = {
         {
             Name = "Player",
@@ -86,7 +86,7 @@ ESP:AddButton({
 
     ChildDefault = false,
 
-    ChildSave = false,
+    ChildSave = true,
 
     ChildCallback = function(Value, Selected)
 
