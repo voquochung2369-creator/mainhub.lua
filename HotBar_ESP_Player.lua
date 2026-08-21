@@ -3,7 +3,7 @@ repeat
 until game:IsLoaded()
 
 
-task.wait(5)
+task.wait(2)
 
 
 
