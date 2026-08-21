@@ -316,13 +316,10 @@ Bloxfruit:AddButton({
     Default = true,
     Save = true,
 	slot = 6,
-
     Callback = function(Enabled)
         if Enabled then
-            -- Bật Camera Shake
             getgenv().DisableCameraShake = false
         else
-            -- Tắt Camera Shake
             getgenv().DisableCameraShake = true
         end
     end
